@@ -1,7 +1,8 @@
 {
-  "name": "ts-project",
+  "name": "starfield-ts",
   "version": "0.1.0",
-  "description": "Project boiler plate using TypeScript, Gulp, Browserify, Uglify and Tape",
+  "description": "Procedural generated starfield",
+  "keywords": ["starfield", "procgen", "typescript", "phaser"],
   "scripts": {
     "build": "gulp bundle && gulp copy",
     "clean": "gulp clean",
@@ -14,7 +15,7 @@
     "watchRefresh": "gulp watchRefresh"
   },
   "author": "Yahiko <yahiko.ninja@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "browser-sync": "^2.18.12",
     "browserify": "^14.4.0",

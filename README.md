@@ -1,34 +1,14 @@
-# TS Project #
+# Starfield #
 
-A frontend project boiler plate in **TypeScript** with **source map** and **continuous integration** support.
-
-Main features:
-
-* Source Map support
-* Incremental Build
-* Continuous Integration
-* Browser auto-refresh
-
-
-Main dependencies:
-
-* **Application Server**: [Node](https://nodejs.org/en/)
-* **Compiler**: [TypeScript](https://github.com/Microsoft/TypeScript)
-* **Linter**: [TSLint](https://github.com/palantir/tslint)
-* **Task Runner**: [Gulp](https://github.com/gulpjs/gulp)
-* **Code Compressor**: [Uglify](https://github.com/mishoo/UglifyJS2)
-* **JavaScript Files Bundler**: [Browserify](https://github.com/substack/node-browserify)
-* **HTTP Server**: [BrowserSync](https://github.com/Browsersync/browsersync.github.io)
-* **Unit Test Runner**: [Tape](https://github.com/substack/tape)
+Procedural generated 2D starfield.
 
 
 ## Installation ##
 
 The TypeScript compiler and TSLint should be installed globally.
 
-	$> git clone https://github.com/yahiko00/TSProject.git <new folder>
+	$> git clone https://github.com/yahiko00/Starfield.git <new folder>
 	$> cd <new folder>
-	$> git init
 	$> npm install
 
 
@@ -55,4 +35,4 @@ yahiko
 
 ## Licence ##
 
-ISC
+MIT
