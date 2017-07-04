@@ -2,6 +2,10 @@
 
 Procedural generated 2D starfield.
 
+## Overview ##
+
+![Starfield overview](https://raw.githubusercontent.com/yahiko00/yahiko00.github.io/master/images/starfield20170704.gif)
+
 
 ## Installation ##
 
