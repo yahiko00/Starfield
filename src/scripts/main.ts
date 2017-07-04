@@ -165,8 +165,8 @@ function create() {
     game.stage.backgroundColor = "#000000";
     canvas = new GraphicsCached(game);
 
-    starfields[0] = new Starfield(canvasW, canvasH, 100, [1.0, 2.0], { x: -0.1, y: 0 });
-    starfields[1] = new Starfield(canvasW, canvasH, 100, [1.0, 5.0], { x: -0.5, y: 0 });
+    starfields[0] = new Starfield(canvasW, canvasH, 600, [1.0, 2.0], { x: -0.1, y: 0 });
+    starfields[1] = new Starfield(canvasW, canvasH,  75, [1.0, 5.0], { x: -0.5, y: 0 });
 
     renderCache();
 } // create
