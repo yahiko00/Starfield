@@ -611,6 +611,10 @@ code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
 
+color-ts@yahiko00/ColorTS:
+  version "0.1.0"
+  resolved "https://codeload.github.com/yahiko00/ColorTS/tar.gz/8d7f509bd8a5db6d972a8ec5991516a0f5ca33c0"
+
 combine-source-map@~0.7.1:
   version "0.7.2"
   resolved "https://registry.yarnpkg.com/combine-source-map/-/combine-source-map-0.7.2.tgz#0870312856b307a87cc4ac486f3a9a62aeccc09e"
@@ -1157,6 +1161,10 @@ fancy-log@^1.1.0:
   dependencies:
     chalk "^1.1.1"
     time-stamp "^1.0.0"
+
+fdrandom@^2.6.1:
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/fdrandom/-/fdrandom-2.6.1.tgz#446928551401a5b0b433d0c34c92898ea45353ef"
 
 filename-regex@^2.0.0:
   version "2.0.1"
