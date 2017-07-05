@@ -71,11 +71,13 @@ gulp.task("bundle", ["compile"], () => {
     if (debug) { dest = settings.paths.debug;  }
     else { dest = settings.paths.release; }
 
-    return browserifyInc({
+    let b = browserifyInc({
             "entries": dest + mainFilename,
             "debug": true,
             "cache": "./.cache.json"
         })
+
+    return b
         .bundle()
         .pipe(source(bundleFilename))
         .pipe(buffer())
@@ -110,12 +112,28 @@ gulp.task("copy", () => {
         .pipe(changed(dest))
         .pipe(gulp.dest(dest + settings.paths.tgtCss));
 
+    /*
     gulp.src("./node_modules/phaser/build/phaser.min.js")
         .pipe(changed(dest))
         .pipe(gulp.dest(dest));
 
     if (debug) {
+        gulp.src("./node_modules/phaser/build/phaser.js")
+            .pipe(changed(dest))
+            .pipe(gulp.dest(dest));
+
         gulp.src("./node_modules/phaser/build/phaser.map")
+            .pipe(changed(dest))
+            .pipe(gulp.dest(dest));
+    }
+    */
+
+    gulp.src("./node_modules/dat.gui/build/dat.gui.min.js")
+        .pipe(changed(dest))
+        .pipe(gulp.dest(dest));
+
+    if (debug) {
+        gulp.src("./node_modules/dat.gui/build/dat.gui.js.map")
             .pipe(changed(dest))
             .pipe(gulp.dest(dest));
     }

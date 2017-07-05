@@ -2,7 +2,12 @@
   "name": "starfield-ts",
   "version": "0.1.0",
   "description": "Procedural generated starfield",
-  "keywords": ["starfield", "procgen", "typescript", "phaser"],
+  "keywords": [
+    "starfield",
+    "procgen",
+    "typescript",
+    "phaser"
+  ],
   "scripts": {
     "build": "gulp bundle && gulp copy",
     "clean": "gulp clean",
@@ -17,6 +22,7 @@
   "author": "Yahiko <yahiko.ninja@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "@types/pixi.js": "^4.5.0",
     "browser-sync": "^2.18.12",
     "browserify": "^14.4.0",
     "browserify-incremental": "^3.1.1",
@@ -39,9 +45,11 @@
     "yargs": "^8.0.2"
   },
   "dependencies": {
+    "@types/exdat": "^0.6.3",
     "color-ts": "yahiko00/ColorTS",
+    "exdat": "^0.6.2",
     "fdrandom": "^2.6.1",
-    "phaser": "^2.6.2"
+    "pixi.js": "^4.5.3"
   },
   "settings": {
     "debug": true,

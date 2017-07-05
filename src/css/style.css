@@ -5,3 +5,12 @@ body {
 	font-size: 1.4em;
 	line-height: 1.5;
 }
+
+#gui {
+	position: fixed;
+	top: 0;
+	right: 0;
+	width: auto;
+	z-index: 1001;
+	text-align: right;
+}
