@@ -6,6 +6,7 @@ Procedural generated 2D starfield.
 
 ![Starfield overview](https://raw.githubusercontent.com/yahiko00/yahiko00.github.io/master/images/starfield20170704.gif)
 
+**[Online Demonstration](http://yahiko.developpez.com/apps/Starfield/)**
 
 ## Installation ##
 

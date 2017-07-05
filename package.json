@@ -1,12 +1,12 @@
 {
   "name": "starfield-ts",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Procedural generated starfield",
   "keywords": [
     "starfield",
     "procgen",
     "typescript",
-    "phaser"
+    "pixi.js"
   ],
   "scripts": {
     "build": "gulp bundle && gulp copy",
@@ -51,7 +51,7 @@
     "pixi.js": "^4.5.3"
   },
   "settings": {
-    "debug": true,
+    "debug": false,
     "tsconfig": {
       "debug": "tsconfig.debug.json",
       "release": "tsconfig.json"
