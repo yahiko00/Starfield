@@ -19,14 +19,6 @@
     normalize-path "^2.0.1"
     through2 "^2.0.3"
 
-"@types/exdat@^0.6.3":
-  version "0.6.3"
-  resolved "https://registry.yarnpkg.com/@types/dat-gui/-/dat-gui-0.6.3.tgz#2285a22ee28fbed05f3932dda9144d18c9903b5d"
-
-"@types/pixi.js@^4.5.0":
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/@types/pixi.js/-/pixi.js-4.5.0.tgz#bdb44481bc42de9fd37a2277d9a4d6386819b71b"
-
 JSONStream@^0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/JSONStream/-/JSONStream-0.10.0.tgz#74349d0d89522b71f30f0a03ff9bd20ca6f12ac0"
@@ -642,7 +634,7 @@ code-point-at@^1.0.0:
 
 color-ts@yahiko00/ColorTS:
   version "0.1.0"
-  resolved "https://codeload.github.com/yahiko00/ColorTS/tar.gz/f7b57cdf017f8c29b0edd416b9a3aed09a82add1"
+  resolved "https://codeload.github.com/yahiko00/ColorTS/tar.gz/f69a8816fd5a2a00c510a9004ecf31ace422f504"
 
 combine-source-map@~0.7.1:
   version "0.7.2"
@@ -1174,9 +1166,9 @@ evp_bytestokey@^1.0.0:
   dependencies:
     create-hash "^1.1.1"
 
-exdat@^0.6.2:
+exdat@yahiko00/dat.gui:
   version "0.6.2"
-  resolved "https://registry.yarnpkg.com/exdat/-/exdat-0.6.2.tgz#9de9cef0d711a3fd48580670b61eec0e9e6b787e"
+  resolved "https://codeload.github.com/yahiko00/dat.gui/tar.gz/8bac3658a17de2f924f38be633e3f3366da5b7f8"
   dependencies:
     brfs "^1.4.0"
 
@@ -3030,6 +3022,10 @@ pinkie@^2.0.0:
 pixi-gl-core@^1.0.3:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/pixi-gl-core/-/pixi-gl-core-1.1.0.tgz#a52cb4dd3254f9c7857a0e9c2356b00e6ec0c761"
+
+pixi-typescript@pixijs/pixi-typescript:
+  version "1.0.0"
+  resolved "https://codeload.github.com/pixijs/pixi-typescript/tar.gz/a7bbf609270b768f7dc5ecaf975029eaa119f012"
 
 pixi.js@^4.5.3:
   version "4.5.3"

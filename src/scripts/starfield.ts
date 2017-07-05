@@ -8,7 +8,7 @@ class Starfield {
     constructor (
         private width: int,
         private height: int,
-        private tone: float,
+        private tone: int,
         public nbStars: int,
         private sizeRange: Interval,
         private starSpeed: Point) {

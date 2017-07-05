@@ -112,22 +112,6 @@ gulp.task("copy", () => {
         .pipe(changed(dest))
         .pipe(gulp.dest(dest + settings.paths.tgtCss));
 
-    /*
-    gulp.src("./node_modules/phaser/build/phaser.min.js")
-        .pipe(changed(dest))
-        .pipe(gulp.dest(dest));
-
-    if (debug) {
-        gulp.src("./node_modules/phaser/build/phaser.js")
-            .pipe(changed(dest))
-            .pipe(gulp.dest(dest));
-
-        gulp.src("./node_modules/phaser/build/phaser.map")
-            .pipe(changed(dest))
-            .pipe(gulp.dest(dest));
-    }
-    */
-
     gulp.src("./node_modules/dat.gui/build/dat.gui.min.js")
         .pipe(changed(dest))
         .pipe(gulp.dest(dest));

@@ -1,7 +1,7 @@
 // star.ts
 
 import rng = require("./rng");
-import utils = require("./utils");
+import color = require("color-ts");
 
 class Star implements Point {
     public alpha: float;
@@ -14,15 +14,19 @@ class Star implements Point {
         public x: float,
         public y: float,
         sizeRange: Interval,
-        tone: float,
+        tone: int,
         private speed: Point,
         private maxX: float,
         private maxY: float) {
             this.alpha = 1.0;
-            let hue = rng.gnorm(tone - 0.2, tone + 0.2);
+            this.hsl = color.rgbNumberToHsl(tone);
+            let hue = rng.gnorm(this.hsl[0] - 0.2, this.hsl[0] + 0.2);
             if (hue < 0.0) hue += 1.0;
             else if (hue > 1.0) hue -= 1.0;
-            this.hsl = utils.randomColorHSL(hue);
+            let sat = rng.gnorm(this.hsl[1] - 0.2, this.hsl[1] + 0.2);
+            if (sat < 0.0) sat = 0;
+            else if (sat > 1.0) sat = 1.0;
+            this.hsl[2] = rng.gnorm(0.5, 1.0);
             this.size = rng.range(sizeRange.min, sizeRange.max);
             this.speed = speed;
             this.adder = rng.irange(0, 1) ? 0.001 : -0.001;

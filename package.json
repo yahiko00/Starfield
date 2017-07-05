@@ -22,7 +22,6 @@
   "author": "Yahiko <yahiko.ninja@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@types/pixi.js": "^4.5.0",
     "browser-sync": "^2.18.12",
     "browserify": "^14.4.0",
     "browserify-incremental": "^3.1.1",
@@ -35,6 +34,7 @@
     "gulp-typescript": "^3.1.7",
     "gulp-uglify": "^3.0.0",
     "gulp-util": "^3.0.8",
+    "pixi-typescript": "pixijs/pixi-typescript",
     "run-sequence": "^2.0.0",
     "tape": "^4.7.0",
     "through2": "^2.0.3",
@@ -45,9 +45,8 @@
     "yargs": "^8.0.2"
   },
   "dependencies": {
-    "@types/exdat": "^0.6.3",
     "color-ts": "yahiko00/ColorTS",
-    "exdat": "^0.6.2",
+    "exdat": "yahiko00/dat.gui",
     "fdrandom": "^2.6.1",
     "pixi.js": "^4.5.3"
   },
