@@ -15,8 +15,8 @@ const params = {
     "starfields": [
         { // back starfield
             "nbStars": 1200,
-            "sizeMin": 1.0,
-            "sizeMax": 2.0,
+            "sizeMin": 1.5,
+            "sizeMax": 2.5,
             "speedX": -0.1,
             "speedY": 0.0,
             "brightSpeed": 0.001,
@@ -24,8 +24,8 @@ const params = {
         },
         { // front starfield
             "nbStars": 75,
-            "sizeMin": 1.0,
-            "sizeMax": 5.0,
+            "sizeMin": 1.5,
+            "sizeMax": 5.5,
             "speedX": -0.5,
             "speedY": 0.0,
             "brightSpeed": 0.001,
@@ -34,7 +34,7 @@ const params = {
     ]
 }
 const starfields: Starfield.Starfield[] = new Array(2);
-const renderer = PIXI.autoDetectRenderer(params.canvasW, params.canvasH);
+const renderer = PIXI.autoDetectRenderer(params.canvasW, params.canvasH, { "antialias": true });
 const stage = new PIXI.Container();
 const graphics = new GraphicsCached(PIXI.Graphics);
 
@@ -84,9 +84,13 @@ function renderCache() {
 
             let cache = graphics.getCache();
             let [red, green, blue] = color.hslToRgb([star.hsl[0], star.hsl[1], star.hsl[2]]);
-            cache.beginFill((red << 16) + (green << 8) + (blue << 0), star.alpha);
-            cache.drawCircle(star.x - 20, star.y - 10, star.size);
+            let rgb = (red << 16) + (green << 8) + (blue << 0);
+            cache.lineStyle(0, 0, star.alpha);
+            cache.beginFill(rgb, star.alpha);
+            cache.drawCircle(star.x - 20.0, star.y - 10.0, star.size - 1.0);
             cache.endFill();
+            cache.lineStyle(1, rgb, star.alpha / 2.0);
+            cache.drawCircle(star.x - 20.0, star.y - 10.0, star.size);
         }
     } // for i
 } // renderCache
