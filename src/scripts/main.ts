@@ -14,24 +14,26 @@ const params = {
     "canvasH": 450,
     "starfields": [
         { // back starfield
-            "tone": 0x1515f0,
             "nbStars": 1200,
             "sizeMin": 1.0,
             "sizeMax": 2.0,
             "speedX": -0.1,
-            "speedY": 0
+            "speedY": 0.0,
+            "brightSpeed": 0.001,
+            "tone": 0x1515f0
         },
         { // front starfield
-            "tone": 0xf0e315,
             "nbStars": 75,
             "sizeMin": 1.0,
             "sizeMax": 5.0,
             "speedX": -0.5,
-            "speedY": 0
+            "speedY": 0.0,
+            "brightSpeed": 0.001,
+            "tone": 0xf0e315
         }
     ]
 }
-const starfields: Starfield[] = new Array(2);
+const starfields: Starfield.Starfield[] = new Array(2);
 const renderer = PIXI.autoDetectRenderer(params.canvasW, params.canvasH);
 const stage = new PIXI.Container();
 const graphics = new GraphicsCached(PIXI.Graphics);
@@ -54,16 +56,8 @@ function generate() {
     renderer.autoResize = true;
     renderer.resize(params.canvasW, params.canvasH);
 
-    starfields[0] = new Starfield(
-        params.canvasW + 20, params.canvasH + 20,
-        params.starfields[0].tone, params.starfields[0].nbStars,
-        { "min": params.starfields[0].sizeMin, "max": params.starfields[0].sizeMax },
-        { "x": params.starfields[0].speedX, "y": params.starfields[0].speedY });
-    starfields[1] = new Starfield(
-        params.canvasW + 20, params.canvasH + 20,
-        params.starfields[1].tone, params.starfields[1].nbStars,
-        { "min": params.starfields[1].sizeMin, "max": params.starfields[1].sizeMax },
-        { "x": params.starfields[1].speedX, "y": params.starfields[1].speedY });
+    starfields[0] = new Starfield.Starfield(params.canvasW + 20, params.canvasH + 20, params.starfields[0]);
+    starfields[1] = new Starfield.Starfield(params.canvasW + 20, params.canvasH + 20, params.starfields[1]);
 
     renderCache();
 } // generate
@@ -126,20 +120,22 @@ window.onload = () => {
     gui.add(params, "canvasW").onChange((value: number) => { params.canvasW = value; });
     gui.add(params, "canvasH").onChange((value: number) => { params.canvasH = value; });
     let guiSfBack = gui.addFolder("Back Star Field");
-    guiSfBack.addColor(params.starfields[0], "tone").onChange((value: number) => { params.starfields[0].tone = rgbStringToNumber(value); });
     guiSfBack.add(params.starfields[0], "nbStars", 0, 10000, 10).onChange((value: number) => { params.starfields[0].nbStars = value; });
     guiSfBack.add(params.starfields[0], "sizeMin", 0.0, 10.0, 0.1).onChange((value: number) => { params.starfields[0].sizeMin = value; });
     guiSfBack.add(params.starfields[0], "sizeMax", 0.0, 10.0, 0.1).onChange((value: number) => { params.starfields[0].sizeMax = value; });
     guiSfBack.add(params.starfields[0], "speedX", -10.0, 10.0, 0.01).onChange((value: number) => { params.starfields[0].speedX = value; });
     guiSfBack.add(params.starfields[0], "speedY", -10.0, 10.0, 0.01).onChange((value: number) => { params.starfields[0].speedY = value; });
+    guiSfBack.add(params.starfields[0], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: number) => { params.starfields[0].brightSpeed = value; });
+    guiSfBack.addColor(params.starfields[0], "tone").onChange((value: number) => { params.starfields[0].tone = rgbStringToNumber(value); });
     guiSfBack.open();
     let guiSfFront = gui.addFolder("Front Star Field");
-    guiSfFront.addColor(params.starfields[1], "tone").onChange((value: number) => { params.starfields[1].tone = rgbStringToNumber(value); });
     guiSfFront.add(params.starfields[1], "nbStars", 0, 10000, 10).onChange((value: number) => { params.starfields[1].nbStars = value; });
     guiSfFront.add(params.starfields[1], "sizeMin", 0.0, 10.0, 0.1).onChange((value: number) => { params.starfields[1].sizeMin = value; });
     guiSfFront.add(params.starfields[1], "sizeMax", 0.0, 10.0, 0.1).onChange((value: number) => { params.starfields[1].sizeMax = value; });
     guiSfFront.add(params.starfields[1], "speedX", -10.0, 10.0, 0.01).onChange((value: number) => { params.starfields[1].speedX = value; });
     guiSfFront.add(params.starfields[1], "speedY", -10.0, 10.0, 0.01).onChange((value: number) => { params.starfields[1].speedY = value; });
+    guiSfFront.add(params.starfields[1], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: number) => { params.starfields[1].brightSpeed = value; });
+    guiSfFront.addColor(params.starfields[1], "tone").onChange((value: number) => { params.starfields[1].tone = rgbStringToNumber(value); });
     guiSfFront.open();
     let guiButton = document.getElementById("gui-button") as HTMLButtonElement;
     let button = document.createElement("button");

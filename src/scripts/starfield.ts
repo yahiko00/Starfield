@@ -3,40 +3,42 @@
 import rng = require("./rng");
 import Star = require("./star");
 
-class Starfield {
-    public stars: Star[];
-    constructor (
-        private width: int,
-        private height: int,
-        private tone: int,
-        public nbStars: int,
-        private sizeRange: Interval,
-        private starSpeed: Point) {
+namespace Starfield {
+    export interface StarfieldParams extends Star.StarParams {
+        nbStars: int
+    } // StarfieldParams
+
+    export class Starfield {
+        public stars: Star.Star[];
+        public nbStars: int;
+        private starParams: Star.StarParams;
+        
+        constructor (private width: int, private height: int, params: StarfieldParams) {
             this.width = width;
             this.height = height;
-            this.tone = tone;
-            this.nbStars = nbStars;
-            this.sizeRange = sizeRange;
-            this.starSpeed = starSpeed;
+            this.nbStars = params.nbStars;
             this.stars = new Array(this.nbStars);
+            this.starParams = params;
+            this.generate();
+        } // constructor
 
+        public generate() {
             for (let i = 0; i <= this.nbStars; i++) {
-                this.stars[i] = new Star(
+                this.stars[i] = new Star.Star(
                     rng.irange(0, this.width),
                     rng.irange(0, this.height),
-                    this.sizeRange,
-                    this.tone,
-                    this.starSpeed,
                     this.width,
-                    this.height);
+                    this.height,
+                    this.starParams);
             } // for i
-    } // constructor
+        } // generate
 
-    update() {
-        for (let i = 0; i <= this.nbStars; i++) {
-            this.stars[i].update();
-        } // for i
-    } // update
+        public update() {
+            for (let i = 0; i <= this.nbStars; i++) {
+                this.stars[i].update();
+            } // for i
+        } // update
+    } // Starfield
 } // Starfield
 
 export = Starfield;
