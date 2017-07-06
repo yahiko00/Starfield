@@ -4,7 +4,7 @@
 
 import color = require("color-ts");
 import Starfield = require("./starfield");
-import GraphicsCached = require("./graphicscached");
+import BufferedGraphics = require("buffered-graphics");
 import dat = require ("exdat");
 import PIXI = require("pixi.js");
 
@@ -36,11 +36,11 @@ const params = {
 const starfields: Starfield.Starfield[] = new Array(2);
 const renderer = PIXI.autoDetectRenderer(params.canvasW, params.canvasH, { "antialias": true });
 const stage = new PIXI.Container();
-const graphics = new GraphicsCached(PIXI.Graphics);
+const graphics = new BufferedGraphics.BufferedGraphics(PIXI.Graphics);
 
 function game() {
-    stage.addChild(graphics.getGraphics());
-    stage.addChild(graphics.getCache());
+    stage.addChild(graphics.getMain());
+    stage.addChild(graphics.getBuffer());
 
     generate();
 
@@ -70,19 +70,19 @@ function update() {
 
 function render() {
     renderer.render(stage);
-    graphics.switchCache();
+    graphics.switchBuffer();
     renderCache();
 } // render
 
 function renderCache() {
-    graphics.clearCache();
+    graphics.clearBuffer();
     for (let i = 0; i < 2; i++) {
         let starfield = starfields[i];
 
         for (let j = 0; j < starfield.nbStars; j++) {
             let star = starfield.stars[j];
 
-            let cache = graphics.getCache();
+            let cache = graphics.getBuffer();
             let [red, green, blue] = color.hslToRgb([star.hsl[0], star.hsl[1], star.hsl[2]]);
             let rgb = (red << 16) + (green << 8) + (blue << 0);
             cache.lineStyle(0, 0, star.alpha);
@@ -91,7 +91,7 @@ function renderCache() {
             cache.endFill();
             cache.lineStyle(1, rgb, star.alpha / 2.0);
             cache.drawCircle(star.x - 20.0, star.y - 10.0, star.size);
-        }
+        } // for j
     } // for i
 } // renderCache
 

@@ -46,7 +46,8 @@
     "yargs": "^8.0.2"
   },
   "dependencies": {
-    "color-ts": "yahiko00/ColorTS",
+    "buffered-graphics": "yahiko00/BufferedGraphics",
+    "color-ts": "^0.2.0",
     "exdat": "yahiko00/dat.gui",
     "fdrandom": "^2.6.1",
     "pixi.js": "^4.5.3"

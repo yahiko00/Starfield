@@ -527,6 +527,10 @@ buffer@^5.0.2:
     base64-js "^1.0.2"
     ieee754 "^1.1.4"
 
+buffered-graphics@yahiko00/BufferedGraphics:
+  version "0.1.0"
+  resolved "https://codeload.github.com/yahiko00/BufferedGraphics/tar.gz/748493df8cb82eb4671f7b259baf6fc27d52c99f"
+
 builtin-modules@^1.0.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/builtin-modules/-/builtin-modules-1.1.1.tgz#270f076c5a72c02f5b65a47df94c5fe3a278892f"
@@ -632,9 +636,9 @@ code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
 
-color-ts@yahiko00/ColorTS:
-  version "0.1.0"
-  resolved "https://codeload.github.com/yahiko00/ColorTS/tar.gz/f69a8816fd5a2a00c510a9004ecf31ace422f504"
+color-ts@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/color-ts/-/color-ts-0.2.0.tgz#b7757e60b3f80de27018981d041ef72663b7463a"
 
 combine-source-map@~0.7.1:
   version "0.7.2"
