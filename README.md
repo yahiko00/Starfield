@@ -8,6 +8,18 @@ Procedural generated 2D starfield.
 
 **[Online Demonstration](http://yahiko.developpez.com/apps/Starfield/)**
 
+
+## Main features ##
+
+* No sprites, everything is drawn live.
+* Two-layer star field.
+* Star positions follow a uniform distribution.
+* Star colorization based on HSL and Gaussian distribution around the given star field's tone.
+* Anti-aliasing.
+* Blurring effect.
+* GUI to change parameters.
+
+
 ## Installation ##
 
 The TypeScript compiler and TSLint should be installed globally.
