@@ -9,52 +9,58 @@ import dat = require ("exdat");
 import PIXI = require("pixi.js");
 
 const params = {
-    "backgroundColor": 0x000000,
-    "canvasW": 800,
-    "canvasH": 450,
-    "starfields": [
+    backgroundColor: 0x000000,
+    canvasW: 800,
+    canvasH: 450,
+    starfields: [
         { // back starfield
-            "nbStars": 1200,
-            "sizeMin": 1.5,
-            "sizeMax": 2.5,
-            "speedX": -0.1,
-            "speedY": 0.0,
-            "brightSpeed": 0.001,
-            "tone": 0x1515f0
+            nbStars: 1200,
+            sizeMin: 1.5,
+            sizeMax: 2.5,
+            speedX: -0.1,
+            speedY: 0.0,
+            brightSpeed: 0.001,
+            tone: 0x1515f0
         },
         { // front starfield
-            "nbStars": 75,
-            "sizeMin": 1.5,
-            "sizeMax": 5.5,
-            "speedX": -0.5,
-            "speedY": 0.0,
-            "brightSpeed": 0.001,
-            "tone": 0xf0e315
+            nbStars: 75,
+            sizeMin: 1.5,
+            sizeMax: 5.5,
+            speedX: -0.5,
+            speedY: 0.0,
+            brightSpeed: 0.001,
+            tone: 0xf0e315
         }
     ]
 }
+
 const starfields: Starfield.Starfield[] = new Array(2);
-const renderer = PIXI.autoDetectRenderer(params.canvasW, params.canvasH, { "antialias": true });
-const stage = new PIXI.Container();
-const graphics = new BufferedGraphics.BufferedGraphics(PIXI.Graphics);
 
-function game() {
-    stage.addChild(graphics.getMain());
-    stage.addChild(graphics.getBuffer());
+const fpsMeter = {
+    framerate: 0.0,
+    elapsed: 0
+}
 
-    generate();
+class Engine {
+    public loader: PIXI.loaders.Loader;
+    public renderer: PIXI.SystemRenderer;
+    public stage: PIXI.Container;
+    public graphics: BufferedGraphics.BufferedGraphics<PIXI.Graphics>;
 
-    (function gameLoop() {
-        requestAnimationFrame(gameLoop);
-        update();
-        render();
-    })();
-} // game
+    constructor() {
+        this.loader = PIXI.loader;
+        this.renderer = PIXI.autoDetectRenderer(params.canvasW, params.canvasH, { "antialias": true });
+        this.stage = new PIXI.Container();
+        this.graphics = new BufferedGraphics.BufferedGraphics(PIXI.Graphics);
+    } // constructor
+} // Engine
+
+const engine = new Engine();
 
 function generate() {
-    renderer.backgroundColor = params.backgroundColor;
-    renderer.autoResize = true;
-    renderer.resize(params.canvasW, params.canvasH);
+    engine.renderer.backgroundColor = params.backgroundColor;
+    engine.renderer.autoResize = true;
+    engine.renderer.resize(params.canvasW, params.canvasH);
 
     starfields[0] = new Starfield.Starfield(params.canvasW + 20, params.canvasH + 20, params.starfields[0]);
     starfields[1] = new Starfield.Starfield(params.canvasW + 20, params.canvasH + 20, params.starfields[1]);
@@ -62,27 +68,43 @@ function generate() {
     renderCache();
 } // generate
 
+function create() {
+    engine.stage.addChild(engine.graphics.getMain());
+    engine.stage.addChild(engine.graphics.getBuffer());
+
+    generate();
+    update();
+} // create
+
 function update() {
+    requestAnimationFrame(update);
+    let now = Date.now();
+    fpsMeter.framerate = 1000 / (now - fpsMeter.elapsed);
+    fpsMeter.elapsed = now;
+    // TODO: show FPS
+
     for (let i = 0; i < 2; i++) {
         starfields[i].update();
     } // for i
+
+    render();
 } // update
 
 function render() {
-    renderer.render(stage);
-    graphics.switchBuffer();
+    engine.renderer.render(engine.stage);
+    engine.graphics.switchBuffer();
     renderCache();
 } // render
 
 function renderCache() {
-    graphics.clearBuffer();
+    engine.graphics.clearBuffer();
     for (let i = 0; i < 2; i++) {
         let starfield = starfields[i];
 
         for (let j = 0; j < starfield.nbStars; j++) {
             let star = starfield.stars[j];
 
-            let cache = graphics.getBuffer();
+            let cache = engine.graphics.getBuffer();
             let [red, green, blue] = color.hslToRgb([star.hsl[0], star.hsl[1], star.hsl[2]]);
             let rgb = (red << 16) + (green << 8) + (blue << 0);
             cache.lineStyle(0, 0, star.alpha);
@@ -109,12 +131,16 @@ function rgbStringToNumber(rgb: int | string): int {
 function updateBackgroundColor(rgb: int | string) {
     let rgbInt = rgbStringToNumber(rgb);
     params.backgroundColor = rgbInt;
-    renderer.backgroundColor = rgbInt;
+    engine.renderer.backgroundColor = rgbInt;
 } // updateBackgroundColor
 
 window.onload = () => {
-    (document.getElementById("game") as HTMLElement).appendChild(renderer.view);
-    game();
+    let container = document.getElementById("game") as HTMLElement;
+    if (!container) {
+        return;
+    }
+    container.appendChild(engine.renderer.view);
+    create();
 
     /***** GUI *****/
     let gui = new dat.GUI({ "autoPlace": false });
