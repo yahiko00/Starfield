@@ -13,6 +13,7 @@ const sourcemaps = require("gulp-sourcemaps");
 const gutil = require("gulp-util");
 const gulpif = require("gulp-if");
 const changed = require("gulp-changed");
+const rename = require("gulp-rename");
 const browserSync = require("browser-sync");
 const runSequence = require("run-sequence");
 const tape = require("gulp-tape");
@@ -20,6 +21,9 @@ const through = require("through2");
 const fs = require("fs");
 
 const debug = settings.debug === true;
+
+if (debug) { console.log("=== DEBUG Environment ===") }
+else { console.log("=== RELEASE Environment ==="); }
 
 // Clean destination directory
 gulp.task("clean", () => {
@@ -100,9 +104,19 @@ gulp.task("copy", () => {
     if (debug) { dest = settings.paths.debug;  }
     else { dest = settings.paths.release; }
 
-    gulp.src(settings.paths.src + "*.html")
-        .pipe(changed(dest))
-        .pipe(gulp.dest(dest));
+    if (debug) {
+        gulp.src(settings.paths.src + "*.debug.html")
+            .pipe(changed(dest))
+            .pipe(rename(path => {
+                path.basename = path.basename.split(".")[0];
+            }))
+            .pipe(gulp.dest(dest));
+    }
+    else {
+        gulp.src([settings.paths.src + "*.html", "!" + settings.paths.src + "*.debug.html"])
+            .pipe(changed(dest))
+            .pipe(gulp.dest(dest));        
+    }
 
     gulp.src(settings.paths.srcImages + "**")
         .pipe(changed(dest))
