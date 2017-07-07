@@ -4,7 +4,7 @@
 
 import color = require("color-ts");
 import Starfield = require("./starfield");
-import BufferedGraphics = require("buffered-graphics");
+import Star = require("./star");
 import dat = require ("exdat");
 import PIXI = require("pixi.js");
 import particles = require("pixi-particles");
@@ -35,7 +35,6 @@ const params = {
         }
     ],
     comet: {
-        maxNb: 1,
         minDelay: 0,
         maxDelay: 0,
         speed: 1,
@@ -46,6 +45,21 @@ const params = {
 }
 
 const starfields: Starfield.Starfield[] = new Array(2);
+const starSprites: PIXI.Sprite[][] = new Array(2);
+
+class Engine {
+    public loader: PIXI.loaders.Loader;
+    public renderer: PIXI.SystemRenderer;
+    public stage: PIXI.Container;
+    public emitter: particles.Emitter | undefined;
+
+    constructor(width: number, height: number) {
+        this.loader = PIXI.loader;
+        this.renderer = PIXI.autoDetectRenderer(width, height, { "antialias": true });
+    } // constructor
+} // Engine
+
+const engine = new Engine(params.canvasW, params.canvasH);
 
 const fpsMeter = {
     frames: 0,
@@ -53,29 +67,6 @@ const fpsMeter = {
     elapsed: Date.now(),
     domElement: document.createElement("div")
 }
-
-class Engine {
-    public loader: PIXI.loaders.Loader;
-    public renderer: PIXI.SystemRenderer;
-    public stage: PIXI.Container;
-    public graphics: BufferedGraphics.BufferedGraphics<PIXI.Graphics>;
-    public emitters: particles.Emitter[];
-
-    constructor(width: number, height: number) {
-        this.loader = PIXI.loader;
-        this.renderer = PIXI.autoDetectRenderer(width, height, { "antialias": true });
-        this.stage = new PIXI.Container();
-        this.graphics = new BufferedGraphics.BufferedGraphics(PIXI.Graphics);
-        this.emitters = [];
-    } // constructor
-
-    addEmitter(emitter: particles.Emitter): particles.Emitter {
-        this.emitters.push(emitter);
-        return emitter;
-    } // addEmitter
-} // Engine
-
-const engine = new Engine(params.canvasW, params.canvasH);
 
 // ==============
 // === STATES ===
@@ -131,10 +122,6 @@ function create() {
     fpsMeter.domElement.style.fontFamily = "monospace";
     container.appendChild(fpsMeter.domElement);
 
-    /* Graphics */
-    engine.stage.addChild(engine.graphics.getMain());
-    engine.stage.addChild(engine.graphics.getBuffer());
-
     generate();
     update();
 } // create
@@ -146,15 +133,25 @@ function update() {
 
     /* Stars */
     for (let i = 0; i < 2; i++) {
-        starfields[i].update();
+        let starfield = starfields[i];
+
+        for (let j = 0; j < starfield.nbStars; j++) {
+            let star = starfield.stars[j];
+
+            star.update();
+            let sprite = starSprites[i][j];
+            sprite.x = star.x;
+
+        } // for j
     } // for i
 
     /* Comets */
-    let emitter = engine.emitters[0];
-    emitter.update(deltaTime * 0.001);
-    emitter.updateOwnerPos(emitter.ownerPos.x - 1.0, emitter.ownerPos.y);
-    if (emitter.ownerPos.x < -10.0) {
-        emitter.updateOwnerPos(engine.renderer.width + 10.0, emitter.ownerPos.y);    
+    if (engine.emitter && engine.emitter.emit) {
+        engine.emitter.update(deltaTime * 0.001);
+        engine.emitter.updateOwnerPos(engine.emitter.ownerPos.x - 1.0, engine.emitter.ownerPos.y);
+        if (engine.emitter.ownerPos.x < -10.0) {
+            engine.emitter.updateOwnerPos(engine.renderer.width + 10.0, engine.emitter.ownerPos.y);    
+        }
     }
 
     /* Supernovae */
@@ -170,9 +167,23 @@ function update() {
 } // update
 
 function render() {
+    /* Sprites */
+    for (let i = 0; i < 2; i++) {
+        let starfield = starfields[i];
+
+        for (let j = 0; j < starfield.nbStars; j++) {
+            let star = starfield.stars[j];
+            let sprite = starSprites[i][j];
+            sprite.x = star.x;
+            sprite.y = star.y;
+            let [red, green, blue] = color.hslToRgb([star.hsl[0], star.hsl[1], star.hsl[2]]);
+            sprite.tint = (red << 16) + (green << 8) + (blue << 0);
+        } // for j
+    } // for i
+
+    let blurFilter = new PIXI.filters.BlurFilter(1.0);
+    engine.stage.filters = [blurFilter];
     engine.renderer.render(engine.stage);
-    engine.graphics.switchBuffer();
-    renderCache();
 } // render
 
 // ===============
@@ -180,6 +191,8 @@ function render() {
 // ===============
 
 function generate() {
+    engine.stage = new PIXI.Container();
+
     /* Setup Renderer */
     engine.renderer.backgroundColor = params.backgroundColor;
     engine.renderer.autoResize = true;
@@ -189,42 +202,33 @@ function generate() {
     starfields[0] = new Starfield.Starfield(params.canvasW + 20, params.canvasH + 20, params.starfields[0]);
     starfields[1] = new Starfield.Starfield(params.canvasW + 20, params.canvasH + 20, params.starfields[1]);
 
-    /* Comet Particle Emitter */
+    /* Create the Comet Particle Emitter */
     cometEmitterConfig.scale.start *= params.comet.size;
     cometEmitterConfig.lifetime.max *= params.comet.length;
     cometEmitterConfig.lifetime.min *=  params.comet.length * params.comet.density;
     const emitterContainer = new PIXI.Container();
     engine.stage.addChild(emitterContainer);
-    engine.addEmitter(new particles.Emitter(
+    engine.emitter = new particles.Emitter(
         emitterContainer,
         [PIXI.Texture.fromImage("./images/particle.png")],
-        cometEmitterConfig));
-    engine.emitters[0].updateOwnerPos(engine.renderer.width / 2, engine.renderer.height / 2);
-    engine.emitters[0].emit = true;
+        cometEmitterConfig);
+    engine.emitter.updateOwnerPos(engine.renderer.width / 2, engine.renderer.height / 2);
+    engine.emitter.emit = false;
 
-    renderCache();
-} // generate
-
-function renderCache() {
-    engine.graphics.clearBuffer();
+    /* Create Stars */
+    let graphics = new PIXI.Graphics();
     for (let i = 0; i < 2; i++) {
         let starfield = starfields[i];
+        starSprites[i] = new Array(starfield.nbStars);
 
         for (let j = 0; j < starfield.nbStars; j++) {
             let star = starfield.stars[j];
 
-            let cache = engine.graphics.getBuffer();
-            let [red, green, blue] = color.hslToRgb([star.hsl[0], star.hsl[1], star.hsl[2]]);
-            let rgb = (red << 16) + (green << 8) + (blue << 0);
-            cache.lineStyle(0, 0, star.alpha);
-            cache.beginFill(rgb, star.alpha);
-            cache.drawCircle(star.x - 20.0, star.y - 10.0, star.size - 1.0);
-            cache.endFill();
-            cache.lineStyle(1, rgb, star.alpha / 2.0);
-            cache.drawCircle(star.x - 20.0, star.y - 10.0, star.size);
+            starSprites[i][j] = createStarSprite(star, graphics);
+            engine.stage.addChild(starSprites[i][j]);
         } // for j
     } // for i
-} // renderCache
+} // generate
 
 function rgbStringToNumber(rgb: int | string): int {
     let rgbInt: int;
@@ -235,12 +239,25 @@ function rgbStringToNumber(rgb: int | string): int {
         rgbInt = color.rgbStringToNumber(rgb);
     }
     return rgbInt;
-}
+} // rgbStringToNumber
 
 function updateBackgroundColor(rgb: int | string) {
     let rgbInt = rgbStringToNumber(rgb);
     params.backgroundColor = rgbInt;
     engine.renderer.backgroundColor = rgbInt;
 } // updateBackgroundColor
+
+function createStarSprite(star: Star.Star, graphics: PIXI.Graphics) {
+    graphics.clear();
+    graphics.lineStyle(0, 0, star.alpha);
+    graphics.beginFill(0xffffff, star.alpha);
+    graphics.drawCircle(star.size, star.size, star.size);
+    graphics.endFill();
+
+    let texture = PIXI.RenderTexture.create(graphics.width, graphics.height);
+    engine.renderer.render(graphics, texture);
+    let sprite = new PIXI.Sprite(texture);
+    return sprite;
+} // createStarSprite
 
 window.onload = load;
