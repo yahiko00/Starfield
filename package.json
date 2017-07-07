@@ -35,7 +35,6 @@
     "gulp-typescript": "^3.1.7",
     "gulp-uglify": "^3.0.0",
     "gulp-util": "^3.0.8",
-    "pixi-typescript": "pixijs/pixi-typescript",
     "run-sequence": "^2.0.0",
     "tape": "^4.7.0",
     "through2": "^2.0.3",
@@ -50,6 +49,8 @@
     "color-ts": "^0.2.0",
     "exdat": "yahiko00/dat.gui",
     "fdrandom": "^2.6.1",
+    "pixi-particles": "yahiko00/pixi-particles",
+    "pixi-typescript": "pixijs/pixi-typescript#v4.x",
     "pixi.js": "^4.5.3"
   },
   "settings": {

@@ -3031,9 +3031,13 @@ pixi-gl-core@^1.0.3:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/pixi-gl-core/-/pixi-gl-core-1.1.0.tgz#a52cb4dd3254f9c7857a0e9c2356b00e6ec0c761"
 
-pixi-typescript@pixijs/pixi-typescript:
-  version "1.0.0"
-  resolved "https://codeload.github.com/pixijs/pixi-typescript/tar.gz/a7bbf609270b768f7dc5ecaf975029eaa119f012"
+pixi-particles@yahiko00/pixi-particles:
+  version "2.1.5"
+  resolved "https://codeload.github.com/yahiko00/pixi-particles/tar.gz/96c6442376492f222eca9ca94c8c052c57bc7f80"
+
+pixi-typescript@pixijs/pixi-typescript#v4.x:
+  version "4.5.3"
+  resolved "https://codeload.github.com/pixijs/pixi-typescript/tar.gz/6602c12f3ee70478bc2dcb6e46654849235ed3e2"
 
 pixi.js@^4.5.3:
   version "4.5.3"
