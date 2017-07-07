@@ -86,7 +86,13 @@ gulp.task("bundle", ["compile"], () => {
         .pipe(source(bundleFilename))
         .pipe(buffer())
         .pipe(gulpif(debug, sourcemaps.init({ loadMaps: true })))
-        .pipe(uglify())
+        .pipe(uglify(/*{
+            "mangle": {
+                "properties": {
+                    "keep_quoted": true
+                }
+            }
+        }*/))
         .pipe(gulpif(debug, sourcemaps.write()))
         .pipe(gulp.dest(dest))
         .on("error", gutil.log)
