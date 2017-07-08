@@ -640,9 +640,9 @@ code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
 
-color-ts@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/color-ts/-/color-ts-0.2.0.tgz#b7757e60b3f80de27018981d041ef72663b7463a"
+color-ts@^0.2.4:
+  version "0.2.4"
+  resolved "https://registry.yarnpkg.com/color-ts/-/color-ts-0.2.4.tgz#8664a217b505a13c5fc4770e3c500c7f1053548e"
 
 combine-source-map@~0.7.1:
   version "0.7.2"
