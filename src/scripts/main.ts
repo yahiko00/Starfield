@@ -15,13 +15,23 @@ const params = {
     canvasH: 450,
     layers: [
         { // back starfield
-            nbStars: 1200,
+            nbStars: 1000,
+            sizeMin: 1.0,
+            sizeMax: 1.5,
+            speedX: 0.0,
+            speedY: 0.0,
+            brightSpeed: 0.001,
+            tone: 0x1515b3
+            // TODO: bounds
+        },
+        { // middle starfield
+            nbStars: 200,
             sizeMin: 1.5,
             sizeMax: 2.5,
             speedX: -0.1,
             speedY: 0.0,
             brightSpeed: 0.001,
-            tone: 0x1515f0
+            tone: 0x4011d9
             // TODO: bounds
         },
         { // front starfield
@@ -56,8 +66,8 @@ const params = {
     }
 }
 
-const layers: Layer.Layer[] = new Array(2);
-const starSprites: PIXI.Sprite[][] = new Array(2);
+const layers: Layer.Layer[] = new Array(3);
+const starSprites: PIXI.Sprite[][] = new Array(3);
 const comets: Comet.Comet[] = [];
 
 class Engine {
@@ -121,16 +131,28 @@ function create() {
         params.layers[0].tone = typeof value === "string" ? rgbStringToNumber(value) : value;
     });
 
+    // Middle Layer folder
+    let guiLayerMiddle = gui.addFolder("Middle Layer");
+    guiLayerMiddle.add(params.layers[1], "nbStars", 0, 10000, 10).onChange((value: int) => { params.layers[1].nbStars = value; });
+    guiLayerMiddle.add(params.layers[1], "sizeMin", 0.0, 10.0, 0.1).onChange((value: float) => { params.layers[1].sizeMin = value; });
+    guiLayerMiddle.add(params.layers[1], "sizeMax", 0.0, 10.0, 0.1).onChange((value: float) => { params.layers[1].sizeMax = value; });
+    guiLayerMiddle.add(params.layers[1], "speedX", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[1].speedX = value; });
+    guiLayerMiddle.add(params.layers[1], "speedY", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[1].speedY = value; });
+    guiLayerMiddle.add(params.layers[1], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: float) => { params.layers[1].brightSpeed = value; });
+    guiLayerMiddle.addColor(params.layers[1], "tone").onChange((value: int | string) => {
+        params.layers[1].tone = typeof value === "string" ? rgbStringToNumber(value) : value;
+    });
+
     // Front Layer folder
     let guiLayerFront = gui.addFolder("Front Layer");
-    guiLayerFront.add(params.layers[1], "nbStars", 0, 10000, 10).onChange((value: int) => { params.layers[1].nbStars = value; });
-    guiLayerFront.add(params.layers[1], "sizeMin", 0.0, 10.0, 0.1).onChange((value: float) => { params.layers[1].sizeMin = value; });
-    guiLayerFront.add(params.layers[1], "sizeMax", 0.0, 10.0, 0.1).onChange((value: float) => { params.layers[1].sizeMax = value; });
-    guiLayerFront.add(params.layers[1], "speedX", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[1].speedX = value; });
-    guiLayerFront.add(params.layers[1], "speedY", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[1].speedY = value; });
-    guiLayerFront.add(params.layers[1], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: float) => { params.layers[1].brightSpeed = value; });
-    guiLayerFront.addColor(params.layers[1], "tone").onChange((value: int | string) => {
-        params.layers[1].tone = typeof value === "string" ? rgbStringToNumber(value) : value;
+    guiLayerFront.add(params.layers[2], "nbStars", 0, 10000, 10).onChange((value: int) => { params.layers[2].nbStars = value; });
+    guiLayerFront.add(params.layers[2], "sizeMin", 0.0, 10.0, 0.1).onChange((value: float) => { params.layers[2].sizeMin = value; });
+    guiLayerFront.add(params.layers[2], "sizeMax", 0.0, 10.0, 0.1).onChange((value: float) => { params.layers[2].sizeMax = value; });
+    guiLayerFront.add(params.layers[2], "speedX", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[2].speedX = value; });
+    guiLayerFront.add(params.layers[2], "speedY", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[2].speedY = value; });
+    guiLayerFront.add(params.layers[2], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: float) => { params.layers[2].brightSpeed = value; });
+    guiLayerFront.addColor(params.layers[2], "tone").onChange((value: int | string) => {
+        params.layers[2].tone = typeof value === "string" ? rgbStringToNumber(value) : value;
     });
 
     // Comet folder
@@ -175,11 +197,11 @@ function update() {
     let frameTime = now - fpsMeter.elapsed;
 
     /* Stars */
-    for (let i = 0; i < 2; i++) {
-        let starfield = layers[i];
+    for (let i = 0; i < layers.length; i++) {
+        let layer = layers[i];
 
-        for (let j = 0; j < starfield.nbStars; j++) {
-            let star = starfield.stars[j];
+        for (let j = 0; j < layer.nbStars; j++) {
+            let star = layer.stars[j];
 
             star.update();
             let sprite = starSprites[i][j];
@@ -218,11 +240,11 @@ function update() {
 
 function render() {
     /* Sprites */
-    for (let i = 0; i < 2; i++) {
-        let starfield = layers[i];
+    for (let i = 0; i < layers.length; i++) {
+        let layer = layers[i];
 
-        for (let j = 0; j < starfield.nbStars; j++) {
-            let star = starfield.stars[j];
+        for (let j = 0; j < layer.nbStars; j++) {
+            let star = layer.stars[j];
             let sprite = starSprites[i][j];
             sprite.x = star.x;
             sprite.y = star.y;
@@ -300,18 +322,15 @@ function generate() {
     engine.renderer.autoResize = true;
     engine.renderer.resize(params.canvasW, params.canvasH);
 
-    /* Layers */
-    layers[0] = new Layer.Layer(params.canvasW + 20, params.canvasH + 20, params.layers[0]);
-    layers[1] = new Layer.Layer(params.canvasW + 20, params.canvasH + 20, params.layers[1]);
-
-    /* Create Stars */
+    /* Create Layers and Stars */
     let graphics = new PIXI.Graphics();
-    for (let i = 0; i < 2; i++) {
-        let starfield = layers[i];
-        starSprites[i] = new Array(starfield.nbStars);
+    for (let i = 0; i < layers.length; i++) {
+        layers[i] = new Layer.Layer(params.canvasW + 20, params.canvasH + 20, params.layers[i]);
+        let layer = layers[i];
+        starSprites[i] = new Array(layer.nbStars);
 
-        for (let j = 0; j < starfield.nbStars; j++) {
-            let star = starfield.stars[j];
+        for (let j = 0; j < layer.nbStars; j++) {
+            let star = layer.stars[j];
 
             starSprites[i][j] = createStarSprite(star, graphics);
             engine.stage.addChild(starSprites[i][j]);

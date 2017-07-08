@@ -47,7 +47,7 @@
   "dependencies": {
     "bezier-easing": "^2.0.3",
     "buffered-graphics": "yahiko00/BufferedGraphics",
-    "color-ts": "^0.2.0",
+    "color-ts": "^0.2.4",
     "exdat": "yahiko00/dat.gui",
     "fdrandom": "^2.6.1",
     "geometry2d": "^0.1.8",
