@@ -42,6 +42,8 @@ const params = {
         size: 3.0,
         length: 10.0,
         density: 0.5,
+        headColor: 0xe4f9ff,
+        tailColor: 0x3fcbff,
         minLifetime: 100000.0, // ms
         maxLifetime: 100000.0, // ms
         bounds: {
@@ -115,7 +117,9 @@ function create() {
     guiLayerBack.add(params.layers[0], "speedX", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[0].speedX = value; });
     guiLayerBack.add(params.layers[0], "speedY", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[0].speedY = value; });
     guiLayerBack.add(params.layers[0], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: float) => { params.layers[0].brightSpeed = value; });
-    guiLayerBack.addColor(params.layers[0], "tone").onChange((value: int) => { params.layers[0].tone = rgbStringToNumber(value); });
+    guiLayerBack.addColor(params.layers[0], "tone").onChange((value: int | string) => {
+        params.layers[0].tone = typeof value === "string" ? rgbStringToNumber(value) : value;
+    });
 
     // Front Layer folder
     let guiLayerFront = gui.addFolder("Front Layer");
@@ -125,7 +129,9 @@ function create() {
     guiLayerFront.add(params.layers[1], "speedX", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[1].speedX = value; });
     guiLayerFront.add(params.layers[1], "speedY", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[1].speedY = value; });
     guiLayerFront.add(params.layers[1], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: float) => { params.layers[1].brightSpeed = value; });
-    guiLayerFront.addColor(params.layers[1], "tone").onChange((value: int) => { params.layers[1].tone = rgbStringToNumber(value); });
+    guiLayerFront.addColor(params.layers[1], "tone").onChange((value: int | string) => {
+        params.layers[1].tone = typeof value === "string" ? rgbStringToNumber(value) : value;
+    });
 
     // Comet folder
     let guiComet = gui.addFolder("Comet");
@@ -135,6 +141,12 @@ function create() {
     guiComet.add(params.comet, "size",  0.0, 10.0, 0.1).onChange((value: float) => { params.comet.size = value; });
     guiComet.add(params.comet, "length", 0.0, 20.0, 0.01).onChange((value: float) => { params.comet.length = value; });
     guiComet.add(params.comet, "density", 0.0, 1.0, 0.01).onChange((value: float) => { params.comet.density = value; });
+    guiComet.addColor(params.comet, "headColor").onChange((value: int | string) => {
+        params.comet.headColor = typeof value === "string" ? rgbStringToNumber(value) : value;
+    });
+    guiComet.addColor(params.comet, "tailColor").onChange((value: int | string) => {
+        params.comet.tailColor = typeof value === "string" ? rgbStringToNumber(value) : value;
+    });
 
     // Regenerate button
     let guiButton = document.getElementById("gui-button") as HTMLButtonElement;
@@ -229,17 +241,19 @@ function render() {
 // ===============
 
 function readTextFile(filename: string, callback: (error?: any, data?: string) => void) {
-    var rawFile = new XMLHttpRequest();
-    rawFile.open("GET", filename, false);
-    rawFile.onreadystatechange = () => {
-        if(rawFile.readyState === 4) {
-            if(rawFile.status === 200 || rawFile.status == 0) {
-                callback(undefined, rawFile.responseText);
+    let textFile = new XMLHttpRequest();
+    textFile.onreadystatechange = () => {
+        if(textFile.readyState === XMLHttpRequest.DONE) {
+            if(textFile.status === 200 || textFile.status == 0) {
+                callback(undefined, textFile.responseText);
+            }
+            else {
+                callback("Error loading " + filename, undefined)
             }
         }
-        callback("Error loading " + filename, undefined)
     }
-    rawFile.send();
+    textFile.open("GET", filename, true);
+    textFile.send(null);
 } // readTextFile
 
 function rgbStringToNumber(rgb: int | string): int {
