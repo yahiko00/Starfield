@@ -36,11 +36,11 @@ const params = {
         }
     ],
     comet: {
-        minSpawnDelay: 0.0, // ms
-        maxSpawnDelay: 1000.0, // ms
+        minSpawnDelay: 1000, // ms
+        maxSpawnDelay: 5000, // ms
         speed: 1.0,
-        size: 2.0,
-        length: 6.0,
+        size: 3.0,
+        length: 10.0,
         density: 0.5,
         minLifetime: 100000.0, // ms
         maxLifetime: 100000.0, // ms
@@ -63,7 +63,7 @@ class Engine {
     public renderer: PIXI.SystemRenderer;
     public stage: PIXI.Container;
 
-    constructor(width: number, height: number) {
+    constructor(width: int, height: int) {
         this.loader = PIXI.loader;
         this.renderer = PIXI.autoDetectRenderer(width, height, { "antialias": true });
     } // constructor
@@ -104,26 +104,39 @@ function create() {
     let guiPanel = document.getElementById("gui-panel") as HTMLElement;
     guiPanel.appendChild(gui.domElement);
     gui.addColor(params, "backgroundColor").onChange(updateBackgroundColor);
-    gui.add(params, "canvasW").onChange((value: number) => { params.canvasW = value; });
-    gui.add(params, "canvasH").onChange((value: number) => { params.canvasH = value; });
-    let guiSfBack = gui.addFolder("Back Star Field");
-    guiSfBack.add(params.starfields[0], "nbStars", 0, 10000, 10).onChange((value: number) => { params.starfields[0].nbStars = value; });
-    guiSfBack.add(params.starfields[0], "sizeMin", 0.0, 10.0, 0.1).onChange((value: number) => { params.starfields[0].sizeMin = value; });
-    guiSfBack.add(params.starfields[0], "sizeMax", 0.0, 10.0, 0.1).onChange((value: number) => { params.starfields[0].sizeMax = value; });
-    guiSfBack.add(params.starfields[0], "speedX", -10.0, 10.0, 0.01).onChange((value: number) => { params.starfields[0].speedX = value; });
-    guiSfBack.add(params.starfields[0], "speedY", -10.0, 10.0, 0.01).onChange((value: number) => { params.starfields[0].speedY = value; });
-    guiSfBack.add(params.starfields[0], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: number) => { params.starfields[0].brightSpeed = value; });
-    guiSfBack.addColor(params.starfields[0], "tone").onChange((value: number) => { params.starfields[0].tone = rgbStringToNumber(value); });
-    guiSfBack.open();
-    let guiSfFront = gui.addFolder("Front Star Field");
-    guiSfFront.add(params.starfields[1], "nbStars", 0, 10000, 10).onChange((value: number) => { params.starfields[1].nbStars = value; });
-    guiSfFront.add(params.starfields[1], "sizeMin", 0.0, 10.0, 0.1).onChange((value: number) => { params.starfields[1].sizeMin = value; });
-    guiSfFront.add(params.starfields[1], "sizeMax", 0.0, 10.0, 0.1).onChange((value: number) => { params.starfields[1].sizeMax = value; });
-    guiSfFront.add(params.starfields[1], "speedX", -10.0, 10.0, 0.01).onChange((value: number) => { params.starfields[1].speedX = value; });
-    guiSfFront.add(params.starfields[1], "speedY", -10.0, 10.0, 0.01).onChange((value: number) => { params.starfields[1].speedY = value; });
-    guiSfFront.add(params.starfields[1], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: number) => { params.starfields[1].brightSpeed = value; });
-    guiSfFront.addColor(params.starfields[1], "tone").onChange((value: number) => { params.starfields[1].tone = rgbStringToNumber(value); });
-    guiSfFront.open();
+    gui.add(params, "canvasW").onChange((value: int) => { params.canvasW = value; });
+    gui.add(params, "canvasH").onChange((value: int) => { params.canvasH = value; });
+
+    // Back Layer folder
+    let guiSfBack = gui.addFolder("Back Layer");
+    guiSfBack.add(params.starfields[0], "nbStars", 0, 10000, 10).onChange((value: int) => { params.starfields[0].nbStars = value; });
+    guiSfBack.add(params.starfields[0], "sizeMin", 0.0, 10.0, 0.1).onChange((value: float) => { params.starfields[0].sizeMin = value; });
+    guiSfBack.add(params.starfields[0], "sizeMax", 0.0, 10.0, 0.1).onChange((value: float) => { params.starfields[0].sizeMax = value; });
+    guiSfBack.add(params.starfields[0], "speedX", -10.0, 10.0, 0.01).onChange((value: float) => { params.starfields[0].speedX = value; });
+    guiSfBack.add(params.starfields[0], "speedY", -10.0, 10.0, 0.01).onChange((value: float) => { params.starfields[0].speedY = value; });
+    guiSfBack.add(params.starfields[0], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: float) => { params.starfields[0].brightSpeed = value; });
+    guiSfBack.addColor(params.starfields[0], "tone").onChange((value: int) => { params.starfields[0].tone = rgbStringToNumber(value); });
+
+    // Front Layer folder
+    let guiSfFront = gui.addFolder("Front Layer");
+    guiSfFront.add(params.starfields[1], "nbStars", 0, 10000, 10).onChange((value: int) => { params.starfields[1].nbStars = value; });
+    guiSfFront.add(params.starfields[1], "sizeMin", 0.0, 10.0, 0.1).onChange((value: float) => { params.starfields[1].sizeMin = value; });
+    guiSfFront.add(params.starfields[1], "sizeMax", 0.0, 10.0, 0.1).onChange((value: float) => { params.starfields[1].sizeMax = value; });
+    guiSfFront.add(params.starfields[1], "speedX", -10.0, 10.0, 0.01).onChange((value: float) => { params.starfields[1].speedX = value; });
+    guiSfFront.add(params.starfields[1], "speedY", -10.0, 10.0, 0.01).onChange((value: float) => { params.starfields[1].speedY = value; });
+    guiSfFront.add(params.starfields[1], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: float) => { params.starfields[1].brightSpeed = value; });
+    guiSfFront.addColor(params.starfields[1], "tone").onChange((value: int) => { params.starfields[1].tone = rgbStringToNumber(value); });
+
+    // Comet folder
+    let guiComet = gui.addFolder("Comet");
+    guiComet.add(params.comet, "minSpawnDelay", 0, 10000, 10).onChange((value: int) => { params.comet.minSpawnDelay = value; });
+    guiComet.add(params.comet, "maxSpawnDelay", 0, 10000, 10).onChange((value: int) => { params.comet.maxSpawnDelay = value; });
+    guiComet.add(params.comet, "speed", 0.0, 10.0, 0.1).onChange((value: float) => { params.comet.speed = value; });
+    guiComet.add(params.comet, "size",  0.0, 10.0, 0.1).onChange((value: float) => { params.comet.size = value; });
+    guiComet.add(params.comet, "length", 0.0, 20.0, 0.01).onChange((value: float) => { params.comet.length = value; });
+    guiComet.add(params.comet, "density", 0.0, 1.0, 0.01).onChange((value: float) => { params.comet.density = value; });
+
+    // Regenerate button
     let guiButton = document.getElementById("gui-button") as HTMLButtonElement;
     let button = document.createElement("button");
     button.innerText = "Regenerate";
@@ -291,6 +304,12 @@ function generate() {
         } // for j
     } // for i
 
+    /* Setup Comet Generation */
+    let cometMargin = 10 * params.comet.length;
+    params.comet.bounds.minX = -cometMargin;
+    params.comet.bounds.minY = -cometMargin;
+    params.comet.bounds.maxX = params.canvasW + cometMargin;
+    params.comet.bounds.maxY = params.canvasH + cometMargin;
     Comet.Comet.setSpawnStart(Date.now(), params.comet);
 } // generate
 
