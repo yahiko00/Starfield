@@ -7,8 +7,7 @@ import Starfield = require("./starfield");
 import Star = require("./star");
 import dat = require ("exdat");
 import PIXI = require("pixi.js");
-import particles = require("pixi-particles");
-import cometEmitterConfig = require("./comet-emitterconfig");
+import Comet = require("./comet");
 
 const params = {
     backgroundColor: 0x000000,
@@ -23,6 +22,7 @@ const params = {
             speedY: 0.0,
             brightSpeed: 0.001,
             tone: 0x1515f0
+            // TODO: bounds
         },
         { // front starfield
             nbStars: 75,
@@ -32,26 +32,36 @@ const params = {
             speedY: 0.0,
             brightSpeed: 0.001,
             tone: 0xf0e315
+            // TODO: bounds
         }
     ],
     comet: {
-        minDelay: 0,
-        maxDelay: 0,
-        speed: 1,
+        minSpawnDelay: 0.0, // ms
+        maxSpawnDelay: 1000.0, // ms
+        speed: 1.0,
         size: 2.0,
         length: 6.0,
-        density: 0.5
+        density: 0.5,
+        minLifetime: 100000.0, // ms
+        maxLifetime: 100000.0, // ms
+        bounds: {
+            minX: 0,
+            minY: 0,
+            maxX: 800,
+            maxY: 450
+        },
+        emitterConfig: undefined
     }
 }
 
 const starfields: Starfield.Starfield[] = new Array(2);
 const starSprites: PIXI.Sprite[][] = new Array(2);
+const comets: Comet.Comet[] = [];
 
 class Engine {
     public loader: PIXI.loaders.Loader;
     public renderer: PIXI.SystemRenderer;
     public stage: PIXI.Container;
-    public emitter: particles.Emitter | undefined;
 
     constructor(width: number, height: number) {
         this.loader = PIXI.loader;
@@ -62,7 +72,7 @@ class Engine {
 const engine = new Engine(params.canvasW, params.canvasH);
 
 const fpsMeter = {
-    frames: 0,
+    nbFrames: 0,
     framerate: 0.0,
     elapsed: Date.now(),
     domElement: document.createElement("div")
@@ -73,7 +83,15 @@ const fpsMeter = {
 // ==============
 
 function load() {
-    create();
+    readTextFile("comet-emitter.json", (error: string, json: string) => {
+        if (error) {
+            console.log(error);
+        }
+        else {
+            params.comet.emitterConfig = JSON.parse(json);
+            create();
+        }
+    });
 } // load
 
 function create() {
@@ -129,7 +147,7 @@ function create() {
 function update() {
     requestAnimationFrame(update);
     let now = Date.now();
-    let deltaTime = now - fpsMeter.elapsed;
+    let frameTime = now - fpsMeter.elapsed;
 
     /* Stars */
     for (let i = 0; i < 2; i++) {
@@ -141,27 +159,34 @@ function update() {
             star.update();
             let sprite = starSprites[i][j];
             sprite.x = star.x;
-
         } // for j
     } // for i
 
     /* Comets */
-    if (engine.emitter && engine.emitter.emit) {
-        engine.emitter.update(deltaTime * 0.001);
-        engine.emitter.updateOwnerPos(engine.emitter.ownerPos.x - 1.0, engine.emitter.ownerPos.y);
-        if (engine.emitter.ownerPos.x < -10.0) {
-            engine.emitter.updateOwnerPos(engine.renderer.width + 10.0, engine.emitter.ownerPos.y);    
+    if (comets.length > 0) {
+        for (let i = 0; i < comets.length; i++) {
+            comets[i].update(frameTime, () => {
+                // destroy
+                Comet.Comet.setSpawnStart(now, params.comet);
+                comets.splice(i, 1);
+                i--;
+            });
+        } // for i
+    }
+    else {
+        if (now - Comet.Comet.spawnStart >= Comet.Comet.spawnDelay) {
+            spawnComet();
         }
     }
 
     /* Supernovae */
 
-    fpsMeter.frames++;
-    if (deltaTime >= 1000) {
-        let framerate = 1000 * fpsMeter.frames / deltaTime;
+    fpsMeter.nbFrames++;
+    if (frameTime >= 1000) {
+        let framerate = 1000 * fpsMeter.nbFrames / frameTime;
         fpsMeter.domElement.innerHTML = "FPS: " + framerate.toFixed(2).toString();
         fpsMeter.elapsed = now;
-        fpsMeter.frames = 0;
+        fpsMeter.nbFrames = 0;
     }
     render();
 } // update
@@ -190,45 +215,19 @@ function render() {
 // === HELPERS ===
 // ===============
 
-function generate() {
-    engine.stage = new PIXI.Container();
-
-    /* Setup Renderer */
-    engine.renderer.backgroundColor = params.backgroundColor;
-    engine.renderer.autoResize = true;
-    engine.renderer.resize(params.canvasW, params.canvasH);
-
-    /* Layers */
-    starfields[0] = new Starfield.Starfield(params.canvasW + 20, params.canvasH + 20, params.starfields[0]);
-    starfields[1] = new Starfield.Starfield(params.canvasW + 20, params.canvasH + 20, params.starfields[1]);
-
-    /* Create the Comet Particle Emitter */
-    cometEmitterConfig.scale.start *= params.comet.size;
-    cometEmitterConfig.lifetime.max *= params.comet.length;
-    cometEmitterConfig.lifetime.min *=  params.comet.length * params.comet.density;
-    const emitterContainer = new PIXI.Container();
-    engine.stage.addChild(emitterContainer);
-    engine.emitter = new particles.Emitter(
-        emitterContainer,
-        [PIXI.Texture.fromImage("./images/particle.png")],
-        cometEmitterConfig);
-    engine.emitter.updateOwnerPos(engine.renderer.width / 2, engine.renderer.height / 2);
-    engine.emitter.emit = false;
-
-    /* Create Stars */
-    let graphics = new PIXI.Graphics();
-    for (let i = 0; i < 2; i++) {
-        let starfield = starfields[i];
-        starSprites[i] = new Array(starfield.nbStars);
-
-        for (let j = 0; j < starfield.nbStars; j++) {
-            let star = starfield.stars[j];
-
-            starSprites[i][j] = createStarSprite(star, graphics);
-            engine.stage.addChild(starSprites[i][j]);
-        } // for j
-    } // for i
-} // generate
+function readTextFile(filename: string, callback: (error?: any, data?: string) => void) {
+    var rawFile = new XMLHttpRequest();
+    rawFile.open("GET", filename, false);
+    rawFile.onreadystatechange = () => {
+        if(rawFile.readyState === 4) {
+            if(rawFile.status === 200 || rawFile.status == 0) {
+                callback(undefined, rawFile.responseText);
+            }
+        }
+        callback("Error loading " + filename, undefined)
+    }
+    rawFile.send();
+} // readTextFile
 
 function rgbStringToNumber(rgb: int | string): int {
     let rgbInt: int;
@@ -259,5 +258,40 @@ function createStarSprite(star: Star.Star, graphics: PIXI.Graphics) {
     let sprite = new PIXI.Sprite(texture);
     return sprite;
 } // createStarSprite
+
+function spawnComet() {
+    const container = new PIXI.Container();
+    engine.stage.addChild(container);
+    comets.push(new Comet.Comet(container, params.comet));
+} // spawnComet
+
+function generate() {
+    engine.stage = new PIXI.Container();
+
+    /* Setup Renderer */
+    engine.renderer.backgroundColor = params.backgroundColor;
+    engine.renderer.autoResize = true;
+    engine.renderer.resize(params.canvasW, params.canvasH);
+
+    /* Layers */
+    starfields[0] = new Starfield.Starfield(params.canvasW + 20, params.canvasH + 20, params.starfields[0]);
+    starfields[1] = new Starfield.Starfield(params.canvasW + 20, params.canvasH + 20, params.starfields[1]);
+
+    /* Create Stars */
+    let graphics = new PIXI.Graphics();
+    for (let i = 0; i < 2; i++) {
+        let starfield = starfields[i];
+        starSprites[i] = new Array(starfield.nbStars);
+
+        for (let j = 0; j < starfield.nbStars; j++) {
+            let star = starfield.stars[j];
+
+            starSprites[i][j] = createStarSprite(star, graphics);
+            engine.stage.addChild(starSprites[i][j]);
+        } // for j
+    } // for i
+
+    Comet.Comet.setSpawnStart(Date.now(), params.comet);
+} // generate
 
 window.onload = load;
