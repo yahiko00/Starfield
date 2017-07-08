@@ -3,6 +3,7 @@
 import particles = require("pixi-particles");
 import g2d = require("geometry2d");
 import rng = require("./rng");
+import color = require("color-ts");
 
 export interface Bounds {
     minX: float;
@@ -18,6 +19,8 @@ export interface Params {
     size: float;
     length: float;
     density: float;
+    headColor: int;
+    tailColor: int;
     minLifetime: float;
     maxLifetime: float;
     bounds: Bounds;
@@ -54,8 +57,25 @@ export class Comet {
         this.lifetime = rng.irange(params.minLifetime, params.maxLifetime);
 
         /* Define position */
-        this.x = rng.range(params.bounds.minX, params.bounds.maxX);
-        this.y = rng.range(params.bounds.minY, params.bounds.maxY);
+        let width = params.bounds.maxX - params.bounds.minX;
+        let height = params.bounds.maxY - params.bounds.minY;
+        let l = rng.range(0.0, 2.0 * width + 2.0 * height); // linear position on the circumference
+        if (l < width) { // up side
+            this.x = l;
+            this.y = params.bounds.minY;
+        }
+        else if (l < width + height) { // right side
+            this.x = params.bounds.maxX;
+            this.y = l - width;
+        }
+        else if (l < 2 * width + height) { // down side
+            this.x = l - width - height;
+            this.y = params.bounds.maxY;
+        }
+        else { // left side
+            this.x = params.bounds.minX;
+            this.y = l - 2 * width - height;
+        }
 
         /* Define direction */
         let angle = rng.next() * 2 * Math.PI;
@@ -70,6 +90,8 @@ export class Comet {
         emitterConfig.lifetime.min *=  params.length * params.density;
         emitterConfig.startRotation.min = (angle + Math.PI) * 180 / Math.PI;
         emitterConfig.startRotation.max = emitterConfig.startRotation.min;
+        emitterConfig.color.start = color.rgbNumberToString(params.headColor);
+        emitterConfig.color.end = color.rgbNumberToString(params.tailColor);
         this.emitter = new particles.Emitter(
             container,
             [PIXI.Texture.fromImage("./images/particle.png")],
