@@ -124,6 +124,10 @@ gulp.task("copy", () => {
             .pipe(gulp.dest(dest));        
     }
 
+    gulp.src(settings.paths.src + "*.json")
+        .pipe(changed(dest))
+        .pipe(gulp.dest(dest));
+
     gulp.src(settings.paths.srcImages + "**")
         .pipe(changed(dest))
         .pipe(gulp.dest(dest + settings.paths.tgtImages));

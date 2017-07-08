@@ -1,6 +1,3 @@
-// emitterconfig.ts
-
-const emitterConfig = 
 {
 	"alpha": {
 		"start": 1,
@@ -53,6 +50,4 @@ const emitterConfig =
 		"y": 0,
 		"r": 1
 	}
-};
-
-export = emitterConfig;
+}

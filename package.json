@@ -45,10 +45,12 @@
     "yargs": "^8.0.2"
   },
   "dependencies": {
+    "bezier-easing": "^2.0.3",
     "buffered-graphics": "yahiko00/BufferedGraphics",
     "color-ts": "^0.2.0",
     "exdat": "yahiko00/dat.gui",
     "fdrandom": "^2.6.1",
+    "geometry2d": "^0.1.8",
     "pixi-particles": "yahiko00/pixi-particles",
     "pixi-typescript": "pixijs/pixi-typescript#v4.x",
     "pixi.js": "^4.5.3"
