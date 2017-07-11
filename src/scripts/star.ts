@@ -22,6 +22,8 @@ export class Star implements Point {
     constructor(
         public x: float,
         public y: float,
+        private minX: float,
+        private minY: float,
         private maxX: float,
         private maxY: float,
         params: StarParams) {
@@ -54,17 +56,17 @@ export class Star implements Point {
         // Move and warp
         this.x += this.speed.x * timeRatio;
         this.y += this.speed.y * timeRatio;
-        if (this.x < 0.0) {
+        if (this.x < this.minX) {
             this.x = this.maxX;
         }
         if (this.x > this.maxX) {
-            this.x = 0.0;
+            this.x = this.minX;
         }
-        if (this.y < 0.0) {
+        if (this.y < this.minY) {
             this.y = this.maxY;
         }
         if (this.y > this.maxY) {
-            this.y = 0.0;
+            this.y = this.minY;
         }
     } // update
 } // Star

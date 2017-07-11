@@ -246,6 +246,7 @@ function create() {
 function update() {
     let now = performance.now();
     let frameTime = now - engine.elapsed;
+    let timeRatio = frameTime * engine.fps * 0.001
 
     /* Stars */
     for (let i = 0; i < layers.length; i++) {
@@ -254,7 +255,7 @@ function update() {
         for (let j = 0; j < layer.nbStars; j++) {
             let star = layer.stars[j];
 
-            star.update(frameTime * engine.fps * 0.001);
+            star.update(timeRatio);
             let sprite = starSprites[i][j];
             sprite.x = star.x;
         } // for j
@@ -263,7 +264,7 @@ function update() {
     /* Comets */
     if (comets.length > 0) {
         for (let i = 0; i < comets.length; i++) {
-            comets[i].update(frameTime, () => {
+            comets[i].update(frameTime, timeRatio, () => {
                 // destroy
                 Comet.Comet.setSpawnStart(now, params.comet);
                 cometContainer.removeChildren();
@@ -410,7 +411,7 @@ function generate() {
 
     /* Create Layers and Stars */
     for (let i = 0; i < layers.length; i++) {
-        layers[i] = new Layer.Layer(params.canvasW + 20, params.canvasH + 20, params.layers[i]);
+        layers[i] = new Layer.Layer(-20, -20, params.canvasW + 20, params.canvasH + 20, params.layers[i]);
         let layer = layers[i];
         starSprites[i] = new Array(layer.nbStars);
 

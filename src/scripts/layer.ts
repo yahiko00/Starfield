@@ -12,9 +12,7 @@ export class Layer {
     public nbStars: int;
     private starParams: Star.StarParams;
     
-    constructor (private width: int, private height: int, params: LayerParams) {
-        this.width = width;
-        this.height = height;
+    constructor (private minX: float, private minY: float, private maxX: float, private maxY: float, params: LayerParams) {
         this.nbStars = params.nbStars;
         this.stars = new Array(this.nbStars);
         this.starParams = params;
@@ -24,10 +22,12 @@ export class Layer {
     public generate() {
         for (let i = 0; i <= this.nbStars; i++) {
             this.stars[i] = new Star.Star(
-                rng.irange(0, this.width),
-                rng.irange(0, this.height),
-                this.width,
-                this.height,
+                rng.irange(0, this.maxX - this.minX),
+                rng.irange(0, this.maxY - this.minY),
+                this.minX,
+                this.minY,
+                this.maxX,
+                this.maxY,
                 this.starParams);
         } // for i
     } // generate

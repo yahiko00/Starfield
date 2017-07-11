@@ -100,10 +100,10 @@ export class Comet {
         this.emitter.emit = true;
     } // constructor
 
-    public update(deltaTime: float, destroy: () => void) {
+    public update(deltaTime: float, timeRatio: float, destroy: () => void) {
         this.lifetime--;
-        this.x += this.dx;
-        this.y += this.dy;
+        this.x += this.dx * timeRatio;
+        this.y += this.dy * timeRatio;
 
         if (this.x < this.bounds.minX || this.y < this.bounds.minY ||
             this.x > this.bounds.maxX || this.y > this.bounds.maxY ||
