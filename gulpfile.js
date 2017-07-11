@@ -132,6 +132,10 @@ gulp.task("copy", () => {
         .pipe(changed(dest))
         .pipe(gulp.dest(dest));
 
+    gulp.src(settings.paths.srcSounds + "**")
+        .pipe(changed(dest))
+        .pipe(gulp.dest(dest + settings.paths.tgtSounds));
+
     gulp.src(settings.paths.srcImages + "**")
         .pipe(changed(dest))
         .pipe(gulp.dest(dest + settings.paths.tgtImages));

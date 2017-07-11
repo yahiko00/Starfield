@@ -64,11 +64,13 @@
       "src": "./src/",
       "srcScripts": "./src/scripts/",
       "srcImages": "./src/images/",
+      "srcSounds": "./src/sounds/",
       "srcCss": "./src/css/",
       "release": "./dist/",
       "debug": "./debug/",
       "tgtScripts": "./",
       "tgtImages": "images/",
+      "tgtSounds": "sounds/",
       "tgtCss": "css/",
       "tests": "./tests/"
     },
