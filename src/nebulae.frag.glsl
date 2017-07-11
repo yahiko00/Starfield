@@ -5,6 +5,10 @@ precision mediump float;
 
 uniform vec2  iResolution;
 uniform float iGlobalTime;
+uniform float redPow;
+uniform float greenPow;
+uniform float bluePow;
+uniform float noiseColor;
 
 #define PI 3.141592653589793
 
@@ -96,13 +100,13 @@ void main() {
 	wc = abs(wb.x);
 	col += vec3(wc * wc * wc, wc * wc, wc);            // increase: B, G, R
 	col *= 0.7;                                        // decrease all RGB components: more black, less white
-	col.r = pow(col.r, 2.18);                          // high pass filter for red
-	col.g *= 0.1; //pow(col.b, 19.88);                         // high pass filter for green
-	col.b = pow(col.b, 1.88);                          // high pass filter for blue
+	col.r = pow(col.r, redPow);                        // high pass filter for red
+	col.g = pow(col.g, greenPow);                      // high pass filter for green
+	col.b = pow(col.b, bluePow);                       // high pass filter for blue
 	col = smoothstep(0., 1., col);                     // Smoothen color gradients
 	//col = 0.5 - (1.4 * col - 0.7) * (1.4 * col - 0.7); // color translation
 	col = 0.75 * sqrt(col);                            // increase all RGB components: less black, more white
-	col *= 1. - 0.25 * fbm4(8. * q);                   // add noise
+	col *= 1. - noiseColor * fbm4(8. * q);             // add noise
 	col = clamp(col, 0., 1.);
 
 	// Vignetting
