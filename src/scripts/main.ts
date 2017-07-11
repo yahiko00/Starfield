@@ -58,7 +58,13 @@ const params = {
         tailColor: 0x3fcbff,
         minLifetime: 100000.0, // ms
         maxLifetime: 100000.0, // ms
-        bounds: {
+        innerBounds: {
+            minX: 0,
+            minY: 0,
+            maxX: 800,
+            maxY: 450
+        },
+        outerBounds: {
             minX: 0,
             minY: 0,
             maxX: 800,
@@ -424,10 +430,14 @@ function generate() {
     } // for i
 
     /* Setup Comet Generation */
+    params.comet.innerBounds.minX = -params.comet.size;
+    params.comet.innerBounds.minY = -params.comet.size;
+    params.comet.innerBounds.maxX = params.canvasW + params.comet.size;
+    params.comet.innerBounds.maxY = params.canvasH + params.comet.size;
     let cometMargin = 50 * params.comet.length;
-    params.comet.bounds.minX = -cometMargin;
-    params.comet.bounds.minY = -cometMargin;
-    params.comet.bounds.maxX = params.canvasW + cometMargin;
-    params.comet.bounds.maxY = params.canvasH + cometMargin;
+    params.comet.outerBounds.minX = -cometMargin;
+    params.comet.outerBounds.minY = -cometMargin;
+    params.comet.outerBounds.maxX = params.canvasW + cometMargin;
+    params.comet.outerBounds.maxY = params.canvasH + cometMargin;
     Comet.Comet.setSpawnStart(now, params.comet);
 } // generate

@@ -23,7 +23,8 @@ export interface Params {
     tailColor: int;
     minLifetime: float;
     maxLifetime: float;
-    bounds: Bounds;
+    innerBounds: Bounds;
+    outerBounds: Bounds;
     emitterConfig: any;
 } // Params
 
@@ -48,7 +49,7 @@ export class Comet {
     } // setSpawnDelay
 
     constructor(public container: PIXI.Container, params: Params) {
-        this.bounds = params.bounds;
+        this.bounds = params.outerBounds;
 
         /* Reset spawn delay */
         Comet.setSpawnDelay(params);
@@ -57,23 +58,23 @@ export class Comet {
         this.lifetime = rng.irange(params.minLifetime, params.maxLifetime);
 
         /* Define position */
-        let width = params.bounds.maxX - params.bounds.minX;
-        let height = params.bounds.maxY - params.bounds.minY;
+        let width = params.innerBounds.maxX - params.innerBounds.minX;
+        let height = params.innerBounds.maxY - params.innerBounds.minY;
         let l = rng.range(0.0, 2.0 * width + 2.0 * height); // linear position on the circumference
         if (l < width) { // up side
             this.x = l;
-            this.y = params.bounds.minY;
+            this.y = params.innerBounds.minY;
         }
         else if (l < width + height) { // right side
-            this.x = params.bounds.maxX;
+            this.x = params.innerBounds.maxX;
             this.y = l - width;
         }
         else if (l < 2 * width + height) { // down side
             this.x = l - width - height;
-            this.y = params.bounds.maxY;
+            this.y = params.innerBounds.maxY;
         }
         else { // left side
-            this.x = params.bounds.minX;
+            this.x = params.innerBounds.minX;
             this.y = l - 2 * width - height;
         }
 
