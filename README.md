@@ -1,21 +1,23 @@
-# Starfield #
+# Starfield Generator #
 
 Procedural generated 2D starfield.
 
 ## Overview ##
 
-![Starfield overview](https://raw.githubusercontent.com/yahiko00/yahiko00.github.io/master/images/starfield20170707.gif)
+![Starfield overview](https://raw.githubusercontent.com/yahiko00/yahiko00.github.io/master/images/starfield20170711.gif)
 
 **[Online Demonstration](http://yahiko.developpez.com/apps/Starfield/)**
 
 
 ## Main features ##
 
-* Two-layer star field.
+* Three-layer star field.
 * Star positions follow a uniform distribution.
 * Star colorization based on HSL and Gaussian distribution around the given star field's tone.
 * Anti-aliasing.
 * Blurring effect.
+* Comet generated with a particle system.
+* Nebulae background generated with simplex noise.
 * GUI to change parameters.
 
 
