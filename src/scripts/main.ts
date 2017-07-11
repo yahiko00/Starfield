@@ -52,7 +52,7 @@ const params = {
         maxSpawnDelay: 3000, // ms
         speed: 1.0,
         size: 3.0,
-        length: 10.0,
+        length: 3.0,
         density: 0.5,
         headColor: 0xe4f9ff,
         tailColor: 0x3fcbff,
@@ -254,7 +254,7 @@ function update() {
         for (let j = 0; j < layer.nbStars; j++) {
             let star = layer.stars[j];
 
-            star.update(frameTime / engine.fps);
+            star.update(frameTime * engine.fps * 0.001);
             let sprite = starSprites[i][j];
             sprite.x = star.x;
         } // for j
@@ -280,6 +280,7 @@ function update() {
 
     /* Supernovae */
 
+    engine.elapsed = now;
 } // update
 
 function render() {
@@ -306,7 +307,7 @@ function render() {
     /* FPS Meter */
     fpsMeter.nbFrames++;
     if (frameTime >= fpsMeter.refresh) {
-        let framerate = 1000 * fpsMeter.nbFrames / frameTime;
+        let framerate = 1000.0 * fpsMeter.nbFrames / frameTime;
         fpsMeter.domElement.innerHTML = "FPS: " + framerate.toFixed(2).toString();
         fpsMeter.elapsed = now;
         fpsMeter.nbFrames = 0;
