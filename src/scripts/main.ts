@@ -84,12 +84,16 @@ class Engine {
     public renderer: PIXI.SystemRenderer;
     public stage: PIXI.Container;
     public graphics: PIXI.Graphics;
+    public fps: int;
+    public elapsed: float;
 
-    constructor(width: int, height: int, containerId?: string) {
+    constructor(width: int, height: int, containerId?: string, fps = 60) {
         this.loader = PIXI.loader;
         this.renderer = PIXI.autoDetectRenderer(width, height, { "antialias": true });
         this.stage = new PIXI.Container();
         this.graphics = new PIXI.Graphics();
+        this.fps = fps;
+        this.elapsed = performance.now();
 
         this.container = containerId ? document.getElementById(containerId) || document.body : document.body;
         this.container.appendChild(this.renderer.view);
@@ -102,7 +106,7 @@ const fpsMeter = {
     nbFrames: 0,
     framerate: 0.0,
     elapsed: performance.now(),
-    refresh: 500,
+    refresh: 500, // ms
     domElement: document.createElement("div")
 }
 
@@ -235,13 +239,13 @@ function create() {
     engine.container.appendChild(fpsMeter.domElement);
 
     generate();
-    update();
+    setInterval(update, 1000.0 / engine.fps);
+    render();
 } // create
 
 function update() {
-    requestAnimationFrame(update);
     let now = performance.now();
-    let frameTime = now - fpsMeter.elapsed;
+    let frameTime = now - engine.elapsed;
 
     /* Stars */
     for (let i = 0; i < layers.length; i++) {
@@ -276,17 +280,13 @@ function update() {
 
     /* Supernovae */
 
-    fpsMeter.nbFrames++;
-    if (frameTime >= fpsMeter.refresh) {
-        let framerate = 1000 * fpsMeter.nbFrames / frameTime;
-        fpsMeter.domElement.innerHTML = "FPS: " + framerate.toFixed(2).toString();
-        fpsMeter.elapsed = now;
-        fpsMeter.nbFrames = 0;
-    }
-    render();
 } // update
 
 function render() {
+    requestAnimationFrame(render);
+    let now = performance.now();
+    let frameTime = now - fpsMeter.elapsed;
+
     /* Sprites */
     for (let i = 0; i < layers.length; i++) {
         let layer = layers[i];
@@ -302,6 +302,15 @@ function render() {
     } // for i
 
     engine.renderer.render(engine.stage);
+
+    /* FPS Meter */
+    fpsMeter.nbFrames++;
+    if (frameTime >= fpsMeter.refresh) {
+        let framerate = 1000 * fpsMeter.nbFrames / frameTime;
+        fpsMeter.domElement.innerHTML = "FPS: " + framerate.toFixed(2).toString();
+        fpsMeter.elapsed = now;
+        fpsMeter.nbFrames = 0;
+    }
 } // render
 
 // ===============
