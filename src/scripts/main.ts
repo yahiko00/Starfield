@@ -423,7 +423,7 @@ function generate() {
     } // for i
 
     /* Setup Comet Generation */
-    let cometMargin = 10 * params.comet.length;
+    let cometMargin = 50 * params.comet.length;
     params.comet.bounds.minX = -cometMargin;
     params.comet.bounds.minY = -cometMargin;
     params.comet.bounds.maxX = params.canvasW + cometMargin;
