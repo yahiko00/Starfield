@@ -2,6 +2,6 @@
 
 import random = require("fdrandom");
 
-const rng = random.pot(Date.now());
+const rng = random.pot(performance.now());
 
 export = rng;

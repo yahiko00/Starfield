@@ -35,9 +35,9 @@ const params = {
             // TODO: bounds
         },
         { // front starfield
-            nbStars: 75,
+            nbStars: 50,
             sizeMin: 1.5,
-            sizeMax: 5.5,
+            sizeMax: 4.0,
             speedX: -0.5,
             speedY: 0.0,
             brightSpeed: 0.001,
@@ -86,30 +86,45 @@ const engine = new Engine(params.canvasW, params.canvasH);
 const fpsMeter = {
     nbFrames: 0,
     framerate: 0.0,
-    elapsed: Date.now(),
+    elapsed: performance.now(),
+    refresh: 500,
     domElement: document.createElement("div")
 }
+
+let nebulaeShaderSrc: string;
+let nebulaeFilter: PIXI.Filter;
+let blurFilter: PIXI.Filter;
+let cometContainer: PIXI.Container;
+
+window.onload = load;
 
 // ==============
 // === STATES ===
 // ==============
 
 function load() {
-    readTextFile("comet-emitter.json", (error: string, json: string) => {
-        if (error) {
-            console.log(error);
-        }
-        else {
-            params.comet.emitterConfig = JSON.parse(json);
+    Promise.all([readTextFilePromise("comet-emitter.json"), readTextFilePromise("nebulae.frag.glsl")])
+        .then((data) => {
+            params.comet.emitterConfig = JSON.parse(data[0]);
+            nebulaeShaderSrc = data[1];
             create();
-        }
-    });
+        })
+        .catch(error => {
+            console.log(error);
+        })
 } // load
 
 function create() {
     /* Main Container */
     let container = document.getElementById("game") || document.body;
     container.appendChild(engine.renderer.view);
+
+    // Comet Container
+    cometContainer = new PIXI.Container();
+
+    // Filters
+    nebulaeFilter = new PIXI.Filter("", nebulaeShaderSrc);
+    blurFilter = new PIXI.filters.BlurFilter(1.0);
 
     /* GUI */
     let gui = new dat.GUI({ "autoPlace": false });
@@ -193,7 +208,7 @@ function create() {
 
 function update() {
     requestAnimationFrame(update);
-    let now = Date.now();
+    let now = performance.now();
     let frameTime = now - fpsMeter.elapsed;
 
     /* Stars */
@@ -229,7 +244,7 @@ function update() {
     /* Supernovae */
 
     fpsMeter.nbFrames++;
-    if (frameTime >= 1000) {
+    if (frameTime >= fpsMeter.refresh) {
         let framerate = 1000 * fpsMeter.nbFrames / frameTime;
         fpsMeter.domElement.innerHTML = "FPS: " + framerate.toFixed(2).toString();
         fpsMeter.elapsed = now;
@@ -253,8 +268,6 @@ function render() {
         } // for j
     } // for i
 
-    let blurFilter = new PIXI.filters.BlurFilter(1.0);
-    engine.stage.filters = [blurFilter];
     engine.renderer.render(engine.stage);
 } // render
 
@@ -277,6 +290,18 @@ function readTextFile(filename: string, callback: (error?: any, data?: string) =
     textFile.open("GET", filename, true);
     textFile.send(null);
 } // readTextFile
+
+type PromiseResolve<T> = (value?: T | PromiseLike<T>) => void;
+type PromiseReject = (error?: any) => void;
+ 
+function readTextFilePromise(filename: string) {
+    return new Promise<string>((resolve: PromiseResolve<string>, reject: PromiseReject): void => {
+        readTextFile(filename, (error: any, data: string) => {
+            if (error) reject(error)
+            else resolve(data)
+        });
+    });
+} // readTextFilePromise
 
 function rgbStringToNumber(rgb: int | string): int {
     let rgbInt: int;
@@ -301,6 +326,7 @@ function createStarSprite(star: Star.Star, graphics: PIXI.Graphics) {
     graphics.beginFill(0xffffff, star.alpha);
     graphics.drawCircle(star.size, star.size, star.size);
     graphics.endFill();
+    graphics.filters = [blurFilter];
 
     let texture = PIXI.RenderTexture.create(graphics.width, graphics.height);
     engine.renderer.render(graphics, texture);
@@ -309,12 +335,14 @@ function createStarSprite(star: Star.Star, graphics: PIXI.Graphics) {
 } // createStarSprite
 
 function spawnComet() {
-    const container = new PIXI.Container();
-    engine.stage.addChild(container);
-    comets.push(new Comet.Comet(container, params.comet));
+    cometContainer.filters = [blurFilter];
+    engine.stage.addChild(cometContainer);
+    comets.push(new Comet.Comet(cometContainer, params.comet));
 } // spawnComet
 
 function generate() {
+    let now = performance.now();
+    let graphics = new PIXI.Graphics();
     engine.stage = new PIXI.Container();
 
     /* Setup Renderer */
@@ -322,8 +350,19 @@ function generate() {
     engine.renderer.autoResize = true;
     engine.renderer.resize(params.canvasW, params.canvasH);
 
+    /* Nebulae Background */
+    nebulaeFilter.uniforms.iResolution = new Float32Array([params.canvasW, params.canvasH]);
+    nebulaeFilter.uniforms.iGlobalTime = now;
+    graphics.clear();
+    graphics.lineStyle(0, 0);
+    graphics.drawRect(0, 0, params.canvasW, params.canvasH);
+    graphics.filters = [nebulaeFilter];
+    let texture = PIXI.RenderTexture.create(graphics.width, graphics.height);
+    engine.renderer.render(graphics, texture);
+    let sprite = new PIXI.Sprite(texture);
+    engine.stage.addChild(sprite);
+
     /* Create Layers and Stars */
-    let graphics = new PIXI.Graphics();
     for (let i = 0; i < layers.length; i++) {
         layers[i] = new Layer.Layer(params.canvasW + 20, params.canvasH + 20, params.layers[i]);
         let layer = layers[i];
@@ -343,7 +382,5 @@ function generate() {
     params.comet.bounds.minY = -cometMargin;
     params.comet.bounds.maxX = params.canvasW + cometMargin;
     params.comet.bounds.maxY = params.canvasH + cometMargin;
-    Comet.Comet.setSpawnStart(Date.now(), params.comet);
+    Comet.Comet.setSpawnStart(now, params.comet);
 } // generate
-
-window.onload = load;
