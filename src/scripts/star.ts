@@ -39,7 +39,7 @@ export class Star implements Point {
             this.alpha = 1.0;
     } // constructor
 
-    update() {
+    update(timeRatio: float) {
         if ((this.hsl[2] <= 0.5 && this.brightChange < 0.0) || (this.hsl[2] >= 1.0 && this.brightChange > 0.0)) {
             this.brightChange *= -1.0;
         }
@@ -52,8 +52,8 @@ export class Star implements Point {
         }
 
         // Move and warp
-        this.x += this.speed.x;
-        this.y += this.speed.y;
+        this.x += this.speed.x * timeRatio;
+        this.y += this.speed.y * timeRatio;
         if (this.x < 0.0) {
             this.x = this.maxX;
         }

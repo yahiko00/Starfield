@@ -254,7 +254,7 @@ function update() {
         for (let j = 0; j < layer.nbStars; j++) {
             let star = layer.stars[j];
 
-            star.update();
+            star.update(frameTime / engine.fps);
             let sprite = starSprites[i][j];
             sprite.x = star.x;
         } // for j
