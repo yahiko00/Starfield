@@ -14,6 +14,7 @@ const params = {
     canvasW: 800,
     canvasH: 450,
     blur: 0.5,
+    mute: false,
     layers: [
         { // back starfield
             nbStars: 1000,
@@ -109,6 +110,7 @@ let nebulaeShaderSrc: string;
 let nebulaeFilter: PIXI.Filter;
 let blurFilter: PIXI.Filter;
 let cometContainer: PIXI.Container;
+let audio: HTMLAudioElement;
 
 window.onload = load;
 
@@ -117,6 +119,11 @@ window.onload = load;
 // ==============
 
 function load() {
+    audio = new Audio("sounds/Divine Divinity - Main Theme - Piano Version.ogg");
+    audio.loop = true;
+    audio.addEventListener("canplaythrough", () => {
+        audio.play();
+    }, false);
     Promise.all([readTextFilePromise("comet-emitter.json"), readTextFilePromise("nebulae.frag.glsl")])
         .then((data) => {
             params.comet.emitterConfig = JSON.parse(data[0]);
@@ -146,6 +153,10 @@ function create() {
     gui.add(params, "blur", 0.0, 2.0, 0.05).onChange((value: float) => {
         params.blur = value;
         blurFilter = new PIXI.filters.BlurFilter(params.blur);
+    });
+    gui.add(params, "mute").onChange((value: boolean) => {
+        params.mute = value;
+        audio.muted = params.mute;
     });
 
     // Nebulae folder
@@ -218,7 +229,7 @@ function create() {
     fpsMeter.domElement.style.position = "fixed";
     fpsMeter.domElement.style.left = "0px";
     fpsMeter.domElement.style.bottom = "0px";
-    fpsMeter.domElement.style.color = "#000000";
+    fpsMeter.domElement.style.color = "#00ff00";
     fpsMeter.domElement.style.zIndex = "10";
     fpsMeter.domElement.style.fontFamily = "monospace";
     engine.container.appendChild(fpsMeter.domElement);
