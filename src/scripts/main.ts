@@ -8,6 +8,7 @@ import Star = require("./star");
 import dat = require ("exdat");
 import PIXI = require("pixi.js");
 import Comet = require("./comet");
+import Filters = require("pixi-filters");
 
 const params = {
     backgroundColor: 0x000000,
@@ -119,6 +120,7 @@ const fpsMeter = {
 let nebulaeShaderSrc: string;
 let nebulaeFilter: PIXI.Filter;
 let blurFilter: PIXI.Filter;
+let bloomFilter: Filters.BloomFilter;
 let cometContainer: PIXI.Container;
 let audio: HTMLAudioElement;
 
@@ -153,6 +155,7 @@ function create() {
     // Filters
     nebulaeFilter = new PIXI.Filter("", nebulaeShaderSrc);
     blurFilter = new PIXI.filters.BlurFilter(params.blur);
+    bloomFilter = new Filters.BloomFilter();
 
     /* GUI */
     let gui = new dat.GUI({ "autoPlace": false });
@@ -191,7 +194,7 @@ function create() {
 
     // Middle Layer folder
     let guiLayerMiddle = gui.addFolder("Middle Layer");
-    guiLayerMiddle.add(params.layers[1], "nbStars", 0, 10000, 10).onChange((value: int) => { params.layers[1].nbStars = value; });
+    guiLayerMiddle.add(params.layers[1], "nbStars", 0, 5000, 10).onChange((value: int) => { params.layers[1].nbStars = value; });
     guiLayerMiddle.add(params.layers[1], "sizeMin", 0.0, 10.0, 0.1).onChange((value: float) => { params.layers[1].sizeMin = value; });
     guiLayerMiddle.add(params.layers[1], "sizeMax", 0.0, 10.0, 0.1).onChange((value: float) => { params.layers[1].sizeMax = value; });
     guiLayerMiddle.add(params.layers[1], "speedX", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[1].speedX = value; });
@@ -203,7 +206,7 @@ function create() {
 
     // Front Layer folder
     let guiLayerFront = gui.addFolder("Front Layer");
-    guiLayerFront.add(params.layers[2], "nbStars", 0, 10000, 10).onChange((value: int) => { params.layers[2].nbStars = value; });
+    guiLayerFront.add(params.layers[2], "nbStars", 0, 1000, 10).onChange((value: int) => { params.layers[2].nbStars = value; });
     guiLayerFront.add(params.layers[2], "sizeMin", 0.0, 10.0, 0.1).onChange((value: float) => { params.layers[2].sizeMin = value; });
     guiLayerFront.add(params.layers[2], "sizeMax", 0.0, 10.0, 0.1).onChange((value: float) => { params.layers[2].sizeMax = value; });
     guiLayerFront.add(params.layers[2], "speedX", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[2].speedX = value; });
@@ -372,15 +375,15 @@ function updateBackgroundColor(rgb: int | string) {
 } // updateBackgroundColor
 
 function createStarSprite(star: Star.Star) {
-    engine.graphics.clear();
-    engine.graphics.lineStyle(0, 0, star.alpha);
-    engine.graphics.beginFill(0xffffff, star.alpha);
-    engine.graphics.drawCircle(star.size, star.size, star.size);
-    engine.graphics.endFill();
+    let graphics = new PIXI.Graphics();
+    graphics.lineStyle(0, 0, star.alpha);
+    graphics.beginFill(0xffffff, star.alpha);
+    graphics.drawCircle(star.size, star.size, star.size);
+    graphics.endFill();
     engine.graphics.filters = [blurFilter];
 
-    let texture = PIXI.RenderTexture.create(engine.graphics.width, engine.graphics.height);
-    engine.renderer.render(engine.graphics, texture);
+    let texture = PIXI.RenderTexture.create(graphics.width, graphics.height);
+    engine.renderer.render(graphics, texture);
     let sprite = new PIXI.Sprite(texture);
     return sprite;
 } // createStarSprite
@@ -441,4 +444,6 @@ function generate() {
     params.comet.outerBounds.maxX = params.canvasW + cometMargin;
     params.comet.outerBounds.maxY = params.canvasH + cometMargin;
     Comet.Comet.setSpawnStart(now, params.comet);
+
+    engine.stage.filters = [bloomFilter];
 } // generate
