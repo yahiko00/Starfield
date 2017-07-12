@@ -41,17 +41,8 @@ export class Star implements Point {
             this.alpha = 1.0;
     } // constructor
 
-    update(timeRatio: float) {
-        if ((this.hsl[2] <= 0.5 && this.brightChange < 0.0) || (this.hsl[2] >= 1.0 && this.brightChange > 0.0)) {
-            this.brightChange *= -1.0;
-        }
-        this.hsl[2] += this.brightChange;
-        if (this.hsl[2] < 0.0) {
-            this.hsl[2] = 0.0;
-        }
-        else if (this.hsl[2] > 1.0) {
-            this.hsl[2] = 1.0;
-        }
+    update(time: float, timeRatio: float) {
+        this.hsl[2] = 0.75 + Math.sin(time * this.brightChange) / 4.0;
 
         // Move and warp
         this.x += this.speed.x * timeRatio;

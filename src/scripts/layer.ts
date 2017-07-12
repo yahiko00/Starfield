@@ -32,9 +32,9 @@ export class Layer {
         } // for i
     } // generate
 
-    public update(timeRatio: float) {
+    public update(time: float, timeRatio: float) {
         for (let i = 0; i <= this.nbStars; i++) {
-            this.stars[i].update(timeRatio);
+            this.stars[i].update(time, timeRatio);
         } // for i
     } // update
 } // Layer

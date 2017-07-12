@@ -14,7 +14,7 @@ const params = {
     canvasW: 800,
     canvasH: 450,
     blur: 0.5,
-    mute: false,
+    mute: true,
     layers: [
         { // back starfield
             nbStars: 1000,
@@ -129,8 +129,9 @@ window.onload = load;
 // ==============
 
 function load() {
-    audio = new Audio("sounds/Divine Divinity - Main Theme - Piano Version.ogg");
+    audio = new Audio("sounds/Divine Divinity - Main Theme.ogg");
     audio.loop = true;
+    audio.muted = params.mute;
     audio.addEventListener("canplaythrough", () => {
         audio.play();
     }, false);
@@ -261,7 +262,7 @@ function update() {
         for (let j = 0; j < layer.nbStars; j++) {
             let star = layer.stars[j];
 
-            star.update(timeRatio);
+            star.update(now, timeRatio);
             let sprite = starSprites[i][j];
             sprite.x = star.x;
         } // for j
