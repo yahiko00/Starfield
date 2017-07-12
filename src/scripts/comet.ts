@@ -60,26 +60,31 @@ export class Comet {
         /* Define position */
         let width = params.innerBounds.maxX - params.innerBounds.minX;
         let height = params.innerBounds.maxY - params.innerBounds.minY;
+        let angle: number;
+
         let l = rng.range(0.0, 2.0 * width + 2.0 * height); // linear position on the circumference
         if (l < width) { // up side
             this.x = l;
             this.y = params.innerBounds.minY;
+            angle = rng.range(0, Math.PI);
         }
         else if (l < width + height) { // right side
             this.x = params.innerBounds.maxX;
             this.y = l - width;
+            angle = rng.range(0.5 * Math.PI, 1.5 * Math.PI);
         }
         else if (l < 2 * width + height) { // down side
             this.x = l - width - height;
             this.y = params.innerBounds.maxY;
+            angle = rng.range(Math.PI, 2 * Math.PI);
         }
         else { // left side
             this.x = params.innerBounds.minX;
             this.y = l - 2 * width - height;
+            angle = rng.range(1.5 * Math.PI, 2.5 * Math.PI);
         }
 
         /* Define direction */
-        let angle = rng.next() * 2 * Math.PI;
         let direction = g2d.angleToVector(angle, params.speed);
         this.dx = direction.x;
         this.dy = direction.y;
