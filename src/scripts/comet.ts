@@ -3,7 +3,6 @@
 import particles = require("pixi-particles");
 import g2d = require("geometry2d");
 import rng = require("./rng");
-import color = require("color-ts");
 
 export interface Bounds {
     minX: float;
@@ -96,8 +95,8 @@ export class Comet {
         emitterConfig.lifetime.min *=  params.length * params.density;
         emitterConfig.startRotation.min = (angle + Math.PI) * 180 / Math.PI;
         emitterConfig.startRotation.max = emitterConfig.startRotation.min;
-        emitterConfig.color.start = color.rgbNumberToString(params.headColor);
-        emitterConfig.color.end = color.rgbNumberToString(params.tailColor);
+        emitterConfig.color.start = params.headColor;
+        emitterConfig.color.end = params.tailColor;
         this.emitter = new particles.Emitter(
             container,
             [PIXI.Texture.fromImage("./images/particle.png")],

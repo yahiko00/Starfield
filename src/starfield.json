@@ -1,0 +1,127 @@
+{
+    "backgroundColor": "#000000",
+    "canvasW": 800,
+    "canvasH": 450,
+    "blur": 0.5,
+    "bloom": 2,
+    "mute": true,
+    "seed": 0,
+    "layerBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 800,
+        "maxY": 450
+    },
+    "layers": [
+        {
+            "nbStars": 1000,
+            "sizeMin": 1.0,
+            "sizeMax": 1.5,
+            "speedX": 0.0,
+            "speedY": 0.0,
+            "brightSpeed": 0.001,
+            "tone": "#1515b3"
+        },
+        {
+            "nbStars": 200,
+            "sizeMin": 1.5,
+            "sizeMax": 2.5,
+            "speedX": -0.1,
+            "speedY": 0.0,
+            "brightSpeed": 0.001,
+            "tone": "#4011d9"
+        },
+        {
+            "nbStars": 20,
+            "sizeMin": 1.5,
+            "sizeMax": 4.0,
+            "speedX": -0.25,
+            "speedY": 0.0,
+            "brightSpeed": 0.001,
+            "tone": "#f0e315"
+        }
+    ],
+    "comet": {
+        "minSpawnDelay": 1000,
+        "maxSpawnDelay": 3000,
+        "speed": 1.0,
+        "size": 3.0,
+        "length": 3.0,
+        "density": 0.5,
+        "headColor": "#e4f9ff",
+        "tailColor": "#3fcbff",
+        "minLifetime": 100000.0,
+        "maxLifetime": 100000.0,
+        "innerBounds": {
+            "minX": 0,
+            "minY": 0,
+            "maxX": 800,
+            "maxY": 450
+        },
+        "outerBounds": {
+            "minX": 0,
+            "minY": 0,
+            "maxX": 800,
+            "maxY": 450
+        },
+        "emitterConfig": {
+            "alpha": {
+                "start": 1,
+                "end": 0
+            },
+            "scale": {
+                "start": 0.05,
+                "end": 0.0,
+                "minimumScaleMultiplier": 1
+            },
+            "color": {
+                "start": "#e4f9ff",
+                "end": "#3fcbff"
+            },
+            "speed": {
+                "start": 10,
+                "end": 5,
+                "minimumSpeedMultiplier": 1
+            },
+            "acceleration": {
+                "x": 0,
+                "y": 0
+            },
+            "maxSpeed": 0,
+            "startRotation": {
+                "min": 0,
+                "max": 0
+            },
+            "noRotation": true,
+            "rotationSpeed": {
+                "min": 0,
+                "max": 0
+            },
+            "lifetime": {
+                "min": 0.5,
+                "max": 1
+            },
+            "blendMode": "normal",
+            "frequency": 0.01,
+            "emitterLifetime": -1,
+            "maxParticles": 500,
+            "pos": {
+                "x": 0,
+                "y": 0
+            },
+            "addAtBack": false,
+            "spawnType": "circle",
+            "spawnCircle": {
+                "x": 0,
+                "y": 0,
+                "r": 1
+            }
+        }
+    },
+    "nebulae": {
+        "redPow": 2.18,
+        "greenPow": 10.0,
+        "bluePow": 1.88,
+        "noiseColor": 0.25
+    }
+}

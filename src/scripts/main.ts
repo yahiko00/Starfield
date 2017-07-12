@@ -11,79 +11,7 @@ import PIXI = require("pixi.js");
 import Comet = require("./comet");
 import Filters = require("pixi-filters");
 
-const params = {
-    backgroundColor: 0x000000,
-    canvasW: 800,
-    canvasH: 450,
-    blur: 0.5,
-    bloom: 2,
-    mute: true,
-    seed: 0,
-    layers: [
-        { // back starfield
-            nbStars: 1000,
-            sizeMin: 1.0,
-            sizeMax: 1.5,
-            speedX: 0.0,
-            speedY: 0.0,
-            brightSpeed: 0.001,
-            tone: 0x1515b3
-            // TODO: bounds
-        },
-        { // middle starfield
-            nbStars: 200,
-            sizeMin: 1.5,
-            sizeMax: 2.5,
-            speedX: -0.1,
-            speedY: 0.0,
-            brightSpeed: 0.001,
-            tone: 0x4011d9
-            // TODO: bounds
-        },
-        { // front starfield
-            nbStars: 50,
-            sizeMin: 1.5,
-            sizeMax: 4.0,
-            speedX: -0.5,
-            speedY: 0.0,
-            brightSpeed: 0.001,
-            tone: 0xf0e315
-            // TODO: bounds
-        }
-    ],
-    comet: {
-        minSpawnDelay: 1000, // ms
-        maxSpawnDelay: 3000, // ms
-        speed: 1.0,
-        size: 3.0,
-        length: 3.0,
-        density: 0.5,
-        headColor: 0xe4f9ff,
-        tailColor: 0x3fcbff,
-        minLifetime: 100000.0, // ms
-        maxLifetime: 100000.0, // ms
-        innerBounds: {
-            minX: 0,
-            minY: 0,
-            maxX: 800,
-            maxY: 450
-        },
-        outerBounds: {
-            minX: 0,
-            minY: 0,
-            maxX: 800,
-            maxY: 450
-        },
-        emitterConfig: undefined
-    },
-    nebulae: {
-        redPow: 2.18,
-        greenPow: 10.0,
-        bluePow: 1.88,
-        noiseColor: 0.25
-    }
-}
-
+let params: any;
 const layers: Layer.Layer[] = new Array(3);
 const starSprites: PIXI.Sprite[][] = new Array(3);
 const comets: Comet.Comet[] = [];
@@ -110,7 +38,7 @@ class Engine {
     } // constructor
 } // Engine
 
-const engine = new Engine(params.canvasW, params.canvasH, "game");
+let engine: Engine;
 
 const fpsMeter = {
     nbFrames: 0,
@@ -138,13 +66,12 @@ window.onload = load;
 function load() {
     audio = new Audio("sounds/Divine Divinity - Main Theme.ogg");
     audio.loop = true;
-    audio.muted = params.mute;
     audio.addEventListener("canplaythrough", () => {
         audio.play();
     }, false);
-    Promise.all([readTextFilePromise("comet-emitter.json"), readTextFilePromise("nebulae.frag.glsl")])
+    Promise.all([readTextFilePromise("starfield.json"), readTextFilePromise("nebulae.frag.glsl")])
         .then((data) => {
-            params.comet.emitterConfig = JSON.parse(data[0]);
+            params = JSON.parse(data[0]);
             nebulaeShaderSrc = data[1];
             create();
         })
@@ -154,6 +81,9 @@ function load() {
 } // load
 
 function create() {
+    engine = new Engine(params.canvasW, params.canvasH, "game");
+    audio.muted = params.mute;
+
     // Comet Container
     cometContainer = new PIXI.Container();
 
@@ -198,7 +128,7 @@ function create() {
     guiLayerBack.add(params.layers[0], "speedY", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[0].speedY = value; });
     guiLayerBack.add(params.layers[0], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: float) => { params.layers[0].brightSpeed = value; });
     guiLayerBack.addColor(params.layers[0], "tone").onChange((value: int | string) => {
-        params.layers[0].tone = typeof value === "string" ? rgbStringToNumber(value) : value;
+        params.layers[0].tone = typeof value === "number" ? color.rgbNumberToString(value) : value;
     });
 
     // Middle Layer folder
@@ -210,7 +140,7 @@ function create() {
     guiLayerMiddle.add(params.layers[1], "speedY", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[1].speedY = value; });
     guiLayerMiddle.add(params.layers[1], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: float) => { params.layers[1].brightSpeed = value; });
     guiLayerMiddle.addColor(params.layers[1], "tone").onChange((value: int | string) => {
-        params.layers[1].tone = typeof value === "string" ? rgbStringToNumber(value) : value;
+        params.layers[1].tone = typeof value === "number" ? color.rgbNumberToString(value) : value;
     });
 
     // Front Layer folder
@@ -222,7 +152,7 @@ function create() {
     guiLayerFront.add(params.layers[2], "speedY", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[2].speedY = value; });
     guiLayerFront.add(params.layers[2], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: float) => { params.layers[2].brightSpeed = value; });
     guiLayerFront.addColor(params.layers[2], "tone").onChange((value: int | string) => {
-        params.layers[2].tone = typeof value === "string" ? rgbStringToNumber(value) : value;
+        params.layers[2].tone = typeof value === "number" ? color.rgbNumberToString(value) : value;
     });
 
     // Comet folder
@@ -234,10 +164,10 @@ function create() {
     guiComet.add(params.comet, "length", 0.0, 20.0, 0.01).onChange((value: float) => { params.comet.length = value; });
     guiComet.add(params.comet, "density", 0.0, 1.0, 0.01).onChange((value: float) => { params.comet.density = value; });
     guiComet.addColor(params.comet, "headColor").onChange((value: int | string) => {
-        params.comet.headColor = typeof value === "string" ? rgbStringToNumber(value) : value;
+        params.comet.headColor = typeof value === "number" ? color.rgbNumberToString(value) : value;
     });
     guiComet.addColor(params.comet, "tailColor").onChange((value: int | string) => {
-        params.comet.tailColor = typeof value === "string" ? rgbStringToNumber(value) : value;
+        params.comet.tailColor = typeof value === "number" ? color.rgbNumberToString(value) : value;
     });
 
     // Seed
@@ -371,17 +301,6 @@ function readTextFilePromise(filename: string) {
         });
     });
 } // readTextFilePromise
-
-function rgbStringToNumber(rgb: int | string): int {
-    let rgbInt: int;
-    if (typeof rgb === "number") {
-        rgbInt = rgb;
-    }
-    else {
-        rgbInt = color.rgbStringToNumber(rgb);
-    }
-    return rgbInt;
-} // rgbStringToNumber
 
 function createStarSprite(star: Star.Star) {
     let graphics = new PIXI.Graphics();
