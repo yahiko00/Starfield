@@ -8,6 +8,7 @@ import Star = require("./star");
 import dat = require ("exdat");
 import PIXI = require("pixi.js");
 import Comet = require("./comet");
+import Filters = require("pix-filters");
 
 const params = {
     backgroundColor: 0x000000,
@@ -119,6 +120,7 @@ const fpsMeter = {
 let nebulaeShaderSrc: string;
 let nebulaeFilter: PIXI.Filter;
 let blurFilter: PIXI.Filter;
+let bloomFilter: Filters.BloomFilter;
 let cometContainer: PIXI.Container;
 let audio: HTMLAudioElement;
 
@@ -153,6 +155,7 @@ function create() {
     // Filters
     nebulaeFilter = new PIXI.Filter("", nebulaeShaderSrc);
     blurFilter = new PIXI.filters.BlurFilter(params.blur);
+    bloomFilter = new Filters.BloomFilter();
 
     /* GUI */
     let gui = new dat.GUI({ "autoPlace": false });
