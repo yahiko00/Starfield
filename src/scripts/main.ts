@@ -2,6 +2,7 @@
 
 /// <reference path="./../../node_modules/pixi-typescript/pixi.js.d.ts" />
 
+import rng = require("./rng");
 import color = require("color-ts");
 import Layer = require("./layer");
 import Star = require("./star");
@@ -15,7 +16,9 @@ const params = {
     canvasW: 800,
     canvasH: 450,
     blur: 0.5,
+    bloom: 2,
     mute: true,
+    seed: 0,
     layers: [
         { // back starfield
             nbStars: 1000,
@@ -124,6 +127,8 @@ let bloomFilter: Filters.BloomFilter;
 let cometContainer: PIXI.Container;
 let audio: HTMLAudioElement;
 
+const gui = new dat.GUI({ "autoPlace": false });
+
 window.onload = load;
 
 // ==============
@@ -156,17 +161,26 @@ function create() {
     nebulaeFilter = new PIXI.Filter("", nebulaeShaderSrc);
     blurFilter = new PIXI.filters.BlurFilter(params.blur);
     bloomFilter = new Filters.BloomFilter();
+    bloomFilter.blur = params.bloom;
 
     /* GUI */
-    let gui = new dat.GUI({ "autoPlace": false });
     let guiPanel = document.getElementById("gui-panel") as HTMLElement;
     guiPanel.appendChild(gui.domElement);
+    gui.add(params, "seed", 0, 9999999999999, 1).onChange((value: int) => {
+        params.seed = value;
+        generate(undefined, params.seed);
+    });
     gui.addColor(params, "backgroundColor").onChange(updateBackgroundColor);
     gui.add(params, "canvasW").onChange((value: int) => { params.canvasW = value; });
     gui.add(params, "canvasH").onChange((value: int) => { params.canvasH = value; });
     gui.add(params, "blur", 0.0, 2.0, 0.05).onChange((value: float) => {
         params.blur = value;
         blurFilter = new PIXI.filters.BlurFilter(params.blur);
+    });
+    gui.add(params, "bloom", 0.0, 10.0, 0.5).onChange((value: float) => {
+        params.blur = value;
+        bloomFilter = new Filters.BloomFilter();
+        bloomFilter.blur = params.bloom;
     });
     gui.add(params, "mute").onChange((value: boolean) => {
         params.mute = value;
@@ -394,9 +408,25 @@ function spawnComet() {
     comets.push(new Comet.Comet(cometContainer, params.comet));
 } // spawnComet
 
-function generate() {
+function generate(event?: Event, seed?: number) {
+    event = event;
     let now = performance.now();
     engine.stage.removeChildren();
+
+    /* Initialize RNG */
+    if (seed === undefined || !isFinite(seed)) {
+        params.seed = Date.now();
+    }
+    else {
+        params.seed = seed;
+    }
+    rng.repot(params.seed);
+    for (let i = 0; i < gui.__controllers.length; i++) {
+        if (gui.__controllers[i].property === "seed") {
+            gui.__controllers[i].updateDisplay();
+            break;
+        }
+    } // for i
 
     /* Setup Renderer */
     engine.renderer.backgroundColor = params.backgroundColor;
@@ -405,11 +435,11 @@ function generate() {
 
     /* Nebulae Background */
     nebulaeFilter.uniforms.iResolution = new Float32Array([params.canvasW, params.canvasH]);
-    nebulaeFilter.uniforms.iGlobalTime = now;
     nebulaeFilter.uniforms.redPow = params.nebulae.redPow;
     nebulaeFilter.uniforms.greenPow = params.nebulae.greenPow;
     nebulaeFilter.uniforms.bluePow = params.nebulae.bluePow;
     nebulaeFilter.uniforms.noiseColor = params.nebulae.noiseColor;
+    nebulaeFilter.uniforms.iGlobalTime = params.seed;
     engine.graphics.clear();
     engine.graphics.lineStyle(0, 0);
     engine.graphics.drawRect(0, 0, params.canvasW, params.canvasH);
