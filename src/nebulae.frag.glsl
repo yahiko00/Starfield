@@ -55,16 +55,16 @@ float marble(in vec2 p) {
 
 float dowarp (in vec2 q, out vec2 a, out vec2 b) {
 	float ang = 0.;
-	ang = 1.2345 * sin(33.33 + 0.015 * iGlobalTime); // 0.015 * iGlobalTime;
+	ang = 1.2345 * sin(33.33); // 0.015 * iGlobalTime;
 	mat2 m1 = mat2(cos(ang), -sin(ang), sin(ang), cos(ang));
-	ang = 0.2345 * sin(66.66 + 0.021 * iGlobalTime); // 0.021 * iGlobalTime;
+	ang = 0.2345 * sin(66.66); // 0.021 * iGlobalTime;
 	mat2 m2 = mat2(cos(ang), -sin(ang), sin(ang), cos(ang));
 
 	a = vec2(marble(m1 * q), marble(m2 * q + vec2(1.12, 0.654)));
 
-	ang = 0.543 * cos(13.33 + 0.011 * iGlobalTime); // 0.011 * iGlobalTime;
+	ang = 0.543 * cos(13.33); // 0.011 * iGlobalTime;
 	m1 = mat2(cos(ang), -sin(ang), sin(ang), cos(ang));
-	ang = 1.128 * cos(53.33 + 0.018 * iGlobalTime); // 0.018 * iGlobalTime;
+	ang = 1.128 * cos(53.33); // 0.018 * iGlobalTime;
 	m2 = mat2(cos(ang), -sin(ang), sin(ang), cos(ang));
 
 	b = vec2(marble(m2 * (q + a)), marble(m1 * (q + a)));
@@ -83,7 +83,7 @@ void main() {
 
 	// Nebulae Background
 	q.x = 0.5 + atan(rd.z, rd.x) / (2. * PI);
-	q.y = 0.5 - asin(rd.y) / PI + 0.512;// + 0.0001 * iGlobalTime;
+	q.y = 0.5 - asin(rd.y) / PI + 0.512 + 0.0001 * iGlobalTime;
 	q *= 2.34;
 
 	vec2 wa = vec2(0.);

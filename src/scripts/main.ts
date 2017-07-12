@@ -166,11 +166,6 @@ function create() {
     /* GUI */
     let guiPanel = document.getElementById("gui-panel") as HTMLElement;
     guiPanel.appendChild(gui.domElement);
-    gui.add(params, "seed", 0, 9999999999999, 1).onChange((value: int) => {
-        params.seed = value;
-        generate(undefined, params.seed);
-    });
-    gui.addColor(params, "backgroundColor").onChange(updateBackgroundColor);
     gui.add(params, "canvasW").onChange((value: int) => { params.canvasW = value; });
     gui.add(params, "canvasH").onChange((value: int) => { params.canvasH = value; });
     gui.add(params, "blur", 0.0, 2.0, 0.05).onChange((value: float) => {
@@ -245,12 +240,18 @@ function create() {
         params.comet.tailColor = typeof value === "string" ? rgbStringToNumber(value) : value;
     });
 
+    // Seed
+    gui.add(params, "seed", 0, 9999999999999, 1).onChange((value: int) => {
+        params.seed = value;
+        generate(params.seed);
+    });
+
     // Regenerate button
     let guiButton = document.getElementById("gui-button") as HTMLButtonElement;
     let button = document.createElement("button");
     button.innerText = "Regenerate";
     button.id = "regenerate";
-    button.onclick = generate;
+    button.onclick = generate.bind(undefined, undefined);
     guiButton.appendChild(button);
 
     /* FPS */
@@ -382,12 +383,6 @@ function rgbStringToNumber(rgb: int | string): int {
     return rgbInt;
 } // rgbStringToNumber
 
-function updateBackgroundColor(rgb: int | string) {
-    let rgbInt = rgbStringToNumber(rgb);
-    params.backgroundColor = rgbInt;
-    engine.renderer.backgroundColor = rgbInt;
-} // updateBackgroundColor
-
 function createStarSprite(star: Star.Star) {
     let graphics = new PIXI.Graphics();
     graphics.lineStyle(0, 0, star.alpha);
@@ -408,14 +403,13 @@ function spawnComet() {
     comets.push(new Comet.Comet(cometContainer, params.comet));
 } // spawnComet
 
-function generate(event?: Event, seed?: number) {
-    event = event;
+function generate(seed?: number) {
     let now = performance.now();
     engine.stage.removeChildren();
 
     /* Initialize RNG */
     if (seed === undefined || !isFinite(seed)) {
-        params.seed = Date.now();
+        params.seed = now;
     }
     else {
         params.seed = seed;
