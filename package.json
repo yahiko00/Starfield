@@ -57,7 +57,7 @@
     "pixi.js": "^4.5.3"
   },
   "settings": {
-    "debug": false,
+    "debug": true,
     "tsconfig": {
       "debug": "tsconfig.debug.json",
       "release": "tsconfig.json"

@@ -20,7 +20,6 @@ const comets: Comet.Comet[] = [];
 /* Graphical Objects */
 let nebulaeShaderSrc: string;
 let nebulaeShader: PIXI.Filter;
-let blurFilter: PIXI.Filter;
 let bloomFilter: Filters.BloomFilter;
 let cometContainer: PIXI.Container;
 let cometParticle: PIXI.Texture;
@@ -106,7 +105,6 @@ function create() {
 
     /* Filters */
     nebulaeShader = new PIXI.Filter("", nebulaeShaderSrc);
-    blurFilter = new PIXI.filters.BlurFilter(params.blur);
     bloomFilter = new Filters.BloomFilter();
     bloomFilter.blur = params.bloom;
 
@@ -120,10 +118,6 @@ function create() {
     guiPanel.appendChild(gui.domElement);
     gui.add(params, "canvasW").onChange((value: int) => { params.canvasW = value; });
     gui.add(params, "canvasH").onChange((value: int) => { params.canvasH = value; });
-    gui.add(params, "blur", 0.0, 2.0, 0.05).onChange((value: float) => {
-        params.blur = value;
-        blurFilter = new PIXI.filters.BlurFilter(params.blur);
-    });
     gui.add(params, "bloom", 0.0, 10.0, 0.5).onChange((value: float) => {
         params.blur = value;
         bloomFilter = new Filters.BloomFilter();
@@ -302,7 +296,6 @@ function createStarSprite(star: Star.Star) {
     graphics.beginFill(0xffffff, star.alpha);
     graphics.drawCircle(star.size, star.size, star.size);
     graphics.endFill();
-    graphics.filters = [blurFilter];
 
     let texture = PIXI.RenderTexture.create(graphics.width, graphics.height);
     engine.renderer.render(graphics, texture);
@@ -311,7 +304,6 @@ function createStarSprite(star: Star.Star) {
 } // createStarSprite
 
 function spawnComet() {
-    cometContainer.filters = [blurFilter];
     engine.stage.addChild(cometContainer);
     comets.push(new Comet.Comet(cometContainer, cometParticle, params.comet));
 } // spawnComet
