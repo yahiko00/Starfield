@@ -2,26 +2,37 @@
 
 /// <reference path="./../../node_modules/pixi-typescript/pixi.js.d.ts" />
 
+import dat = require ("exdat");
+import PIXI = require("pixi.js");
+import Filters = require("pixi-filters");
 import rng = require("./rng");
 import color = require("color-ts");
 import Layer = require("./layer");
 import Star = require("./star");
-import dat = require ("exdat");
-import PIXI = require("pixi.js");
 import Comet = require("./comet");
-import Filters = require("pixi-filters");
 
+/* Logical Objects */
 let params: any;
 const layers: Layer.Layer[] = new Array(3);
 const starSprites: PIXI.Sprite[][] = new Array(3);
 const comets: Comet.Comet[] = [];
+
+/* Graphical Objects */
+let nebulaeShaderSrc: string;
+let nebulaeShader: PIXI.Filter;
+let blurFilter: PIXI.Filter;
+let bloomFilter: Filters.BloomFilter;
+let cometContainer: PIXI.Container;
+let cometParticle: PIXI.Texture;
+let audio: HTMLAudioElement;
+
+const gui = new dat.GUI({ load: JSON, autoPlace: false });
 
 class Engine {
     public container: HTMLElement;
     public loader: PIXI.loaders.Loader;
     public renderer: PIXI.SystemRenderer;
     public stage: PIXI.Container;
-    public graphics: PIXI.Graphics;
     public fps: int;
     public elapsed: float;
 
@@ -29,7 +40,6 @@ class Engine {
         this.loader = PIXI.loader;
         this.renderer = PIXI.autoDetectRenderer(width, height, { "antialias": true });
         this.stage = new PIXI.Container();
-        this.graphics = new PIXI.Graphics();
         this.fps = fps;
         this.elapsed = performance.now();
 
@@ -48,15 +58,6 @@ const fpsMeter = {
     domElement: document.createElement("div")
 }
 
-let nebulaeShaderSrc: string;
-let nebulaeFilter: PIXI.Filter;
-let blurFilter: PIXI.Filter;
-let bloomFilter: Filters.BloomFilter;
-let cometContainer: PIXI.Container;
-let audio: HTMLAudioElement;
-
-const gui = new dat.GUI({ "autoPlace": false });
-
 window.onload = load;
 
 // ==============
@@ -64,36 +65,57 @@ window.onload = load;
 // ==============
 
 function load() {
-    audio = new Audio("sounds/Divine Divinity - Main Theme.ogg");
-    audio.loop = true;
-    audio.addEventListener("canplaythrough", () => {
-        audio.play();
-    }, false);
-    Promise.all([readTextFilePromise("starfield.json"), readTextFilePromise("nebulae.frag.glsl")])
-        .then((data) => {
-            params = JSON.parse(data[0]);
-            nebulaeShaderSrc = data[1];
+    const loader = new PIXI.loaders.Loader();
+    loader
+        .add("params", "./starfield.json")
+        .add("nebulaeShaderSrc", "./nebulae.frag.glsl")
+        .add("cometParticle", "./images/particle.png")
+        .on("progress", (loader: PIXI.loaders.Loader, ressource: PIXI.loaders.Resource) => {
+            loader; // Prevents TS unused parameter error
+            console.log("Loading " + ressource.url + "...");
+        })
+        .on("load", (loader: PIXI.loaders.Loader, ressource: PIXI.loaders.Resource) => {
+            loader; // Prevents TS unused parameter error
+            console.log(ressource.url + " loaded.");
+        })
+        .on("error", (error: Error) => {
+            console.log(error)
+        })
+        .load((loader: PIXI.loaders.Loader, ressources: any) => {
+            loader; // Prevents TS unused parameter error
+            params = ressources.params.data;
+            nebulaeShaderSrc = ressources.nebulaeShaderSrc.data;
+            cometParticle = ressources.cometParticle.texture;
             create();
-        })
-        .catch(error => {
-            console.log(error);
-        })
+        });
 } // load
 
 function create() {
     engine = new Engine(params.canvasW, params.canvasH, "game");
-    audio.muted = params.mute;
 
-    // Comet Container
+    /* Music */
+    audio = new Audio("sounds/Divine Divinity - Main Theme.ogg");
+    audio.addEventListener("canplaythrough", () => {
+        audio.loop = true;
+        audio.muted = params.mute;
+        audio.play();
+    }, false);
+    
+    /* Comet Container */
     cometContainer = new PIXI.Container();
 
-    // Filters
-    nebulaeFilter = new PIXI.Filter("", nebulaeShaderSrc);
+    /* Filters */
+    nebulaeShader = new PIXI.Filter("", nebulaeShaderSrc);
     blurFilter = new PIXI.filters.BlurFilter(params.blur);
     bloomFilter = new Filters.BloomFilter();
     bloomFilter.blur = params.bloom;
 
     /* GUI */
+
+    // Save Default Parameters
+    // gui.remember(params);
+
+    // Global parameters
     let guiPanel = document.getElementById("gui-panel") as HTMLElement;
     guiPanel.appendChild(gui.domElement);
     gui.add(params, "canvasW").onChange((value: int) => { params.canvasW = value; });
@@ -274,41 +296,13 @@ function render() {
 // === HELPERS ===
 // ===============
 
-function readTextFile(filename: string, callback: (error?: any, data?: string) => void) {
-    let textFile = new XMLHttpRequest();
-    textFile.onreadystatechange = () => {
-        if(textFile.readyState === XMLHttpRequest.DONE) {
-            if(textFile.status === 200 || textFile.status == 0) {
-                callback(undefined, textFile.responseText);
-            }
-            else {
-                callback("Error loading " + filename, undefined)
-            }
-        }
-    }
-    textFile.open("GET", filename, true);
-    textFile.send(null);
-} // readTextFile
-
-type PromiseResolve<T> = (value?: T | PromiseLike<T>) => void;
-type PromiseReject = (error?: any) => void;
- 
-function readTextFilePromise(filename: string) {
-    return new Promise<string>((resolve: PromiseResolve<string>, reject: PromiseReject): void => {
-        readTextFile(filename, (error: any, data: string) => {
-            if (error) reject(error)
-            else resolve(data)
-        });
-    });
-} // readTextFilePromise
-
 function createStarSprite(star: Star.Star) {
     let graphics = new PIXI.Graphics();
     graphics.lineStyle(0, 0, star.alpha);
     graphics.beginFill(0xffffff, star.alpha);
     graphics.drawCircle(star.size, star.size, star.size);
     graphics.endFill();
-    engine.graphics.filters = [blurFilter];
+    graphics.filters = [blurFilter];
 
     let texture = PIXI.RenderTexture.create(graphics.width, graphics.height);
     engine.renderer.render(graphics, texture);
@@ -319,7 +313,7 @@ function createStarSprite(star: Star.Star) {
 function spawnComet() {
     cometContainer.filters = [blurFilter];
     engine.stage.addChild(cometContainer);
-    comets.push(new Comet.Comet(cometContainer, params.comet));
+    comets.push(new Comet.Comet(cometContainer, cometParticle, params.comet));
 } // spawnComet
 
 function generate(seed?: number) {
@@ -347,18 +341,17 @@ function generate(seed?: number) {
     engine.renderer.resize(params.canvasW, params.canvasH);
 
     /* Nebulae Background */
-    nebulaeFilter.uniforms.iResolution = new Float32Array([params.canvasW, params.canvasH]);
-    nebulaeFilter.uniforms.redPow = params.nebulae.redPow;
-    nebulaeFilter.uniforms.greenPow = params.nebulae.greenPow;
-    nebulaeFilter.uniforms.bluePow = params.nebulae.bluePow;
-    nebulaeFilter.uniforms.noiseColor = params.nebulae.noiseColor;
-    nebulaeFilter.uniforms.iGlobalTime = params.seed;
-    engine.graphics.clear();
-    engine.graphics.lineStyle(0, 0);
-    engine.graphics.drawRect(0, 0, params.canvasW, params.canvasH);
-    engine.graphics.filters = [nebulaeFilter];
-    let texture = PIXI.RenderTexture.create(engine.graphics.width, engine.graphics.height);
-    engine.renderer.render(engine.graphics, texture);
+    nebulaeShader.uniforms.iResolution = new Float32Array([params.canvasW, params.canvasH]);
+    nebulaeShader.uniforms.redPow = params.nebulae.redPow;
+    nebulaeShader.uniforms.greenPow = params.nebulae.greenPow;
+    nebulaeShader.uniforms.bluePow = params.nebulae.bluePow;
+    nebulaeShader.uniforms.noiseColor = params.nebulae.noiseColor;
+    nebulaeShader.uniforms.iGlobalTime = params.seed;
+    let graphics = new PIXI.Graphics();
+    graphics.filterArea = new PIXI.Rectangle(0, 0, params.canvasW, params.canvasH);
+    graphics.filters = [nebulaeShader];
+    let texture = PIXI.RenderTexture.create(params.canvasW, params.canvasH);
+    engine.renderer.render(graphics, texture);
     let sprite = new PIXI.Sprite(texture);
     engine.stage.addChild(sprite);
 
