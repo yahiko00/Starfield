@@ -9,7 +9,7 @@ export interface StarParams {
     speedX: float,
     speedY: float,
     brightSpeed: float,
-    tone: int
+    tone: string
 } // StarParams
 
 export class Star implements Point {
@@ -30,7 +30,7 @@ export class Star implements Point {
             this.size = rng.range(params.sizeMin, params.sizeMax);
             this.speed = { "x": params.speedX, "y": params.speedY };
             this.brightChange = params.brightSpeed * (rng.irange(0, 1) ? 1.0 : -1.0);
-            this.hsl = color.rgbNumberToHsl(params.tone);
+            this.hsl = color.rgbStringToHsl(params.tone);
             let hue = rng.gnorm(this.hsl[0] - 0.2, this.hsl[0] + 0.2);
             if (hue < 0.0) hue += 1.0;
             else if (hue > 1.0) hue -= 1.0;

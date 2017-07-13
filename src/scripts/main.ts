@@ -2,95 +2,37 @@
 
 /// <reference path="./../../node_modules/pixi-typescript/pixi.js.d.ts" />
 
+import dat = require ("exdat");
+import PIXI = require("pixi.js");
+import Filters = require("pixi-filters");
+import rng = require("./rng");
 import color = require("color-ts");
 import Layer = require("./layer");
 import Star = require("./star");
-import dat = require ("exdat");
-import PIXI = require("pixi.js");
 import Comet = require("./comet");
-import Filters = require("pixi-filters");
 
-const params = {
-    backgroundColor: 0x000000,
-    canvasW: 800,
-    canvasH: 450,
-    blur: 0.5,
-    mute: true,
-    layers: [
-        { // back starfield
-            nbStars: 1000,
-            sizeMin: 1.0,
-            sizeMax: 1.5,
-            speedX: 0.0,
-            speedY: 0.0,
-            brightSpeed: 0.001,
-            tone: 0x1515b3
-            // TODO: bounds
-        },
-        { // middle starfield
-            nbStars: 200,
-            sizeMin: 1.5,
-            sizeMax: 2.5,
-            speedX: -0.1,
-            speedY: 0.0,
-            brightSpeed: 0.001,
-            tone: 0x4011d9
-            // TODO: bounds
-        },
-        { // front starfield
-            nbStars: 50,
-            sizeMin: 1.5,
-            sizeMax: 4.0,
-            speedX: -0.5,
-            speedY: 0.0,
-            brightSpeed: 0.001,
-            tone: 0xf0e315
-            // TODO: bounds
-        }
-    ],
-    comet: {
-        minSpawnDelay: 1000, // ms
-        maxSpawnDelay: 3000, // ms
-        speed: 1.0,
-        size: 3.0,
-        length: 3.0,
-        density: 0.5,
-        headColor: 0xe4f9ff,
-        tailColor: 0x3fcbff,
-        minLifetime: 100000.0, // ms
-        maxLifetime: 100000.0, // ms
-        innerBounds: {
-            minX: 0,
-            minY: 0,
-            maxX: 800,
-            maxY: 450
-        },
-        outerBounds: {
-            minX: 0,
-            minY: 0,
-            maxX: 800,
-            maxY: 450
-        },
-        emitterConfig: undefined
-    },
-    nebulae: {
-        redPow: 2.18,
-        greenPow: 10.0,
-        bluePow: 1.88,
-        noiseColor: 0.25
-    }
-}
-
+/* Logical Objects */
+let params: any;
 const layers: Layer.Layer[] = new Array(3);
 const starSprites: PIXI.Sprite[][] = new Array(3);
 const comets: Comet.Comet[] = [];
+
+/* Graphical Objects */
+let nebulaeShaderSrc: string;
+let nebulaeShader: PIXI.Filter;
+let blurFilter: PIXI.Filter;
+let bloomFilter: Filters.BloomFilter;
+let cometContainer: PIXI.Container;
+let cometParticle: PIXI.Texture;
+let audio: HTMLAudioElement;
+
+const gui = new dat.GUI({ load: JSON, autoPlace: false });
 
 class Engine {
     public container: HTMLElement;
     public loader: PIXI.loaders.Loader;
     public renderer: PIXI.SystemRenderer;
     public stage: PIXI.Container;
-    public graphics: PIXI.Graphics;
     public fps: int;
     public elapsed: float;
 
@@ -98,7 +40,6 @@ class Engine {
         this.loader = PIXI.loader;
         this.renderer = PIXI.autoDetectRenderer(width, height, { "antialias": true });
         this.stage = new PIXI.Container();
-        this.graphics = new PIXI.Graphics();
         this.fps = fps;
         this.elapsed = performance.now();
 
@@ -107,7 +48,7 @@ class Engine {
     } // constructor
 } // Engine
 
-const engine = new Engine(params.canvasW, params.canvasH, "game");
+let engine: Engine;
 
 const fpsMeter = {
     nbFrames: 0,
@@ -117,13 +58,6 @@ const fpsMeter = {
     domElement: document.createElement("div")
 }
 
-let nebulaeShaderSrc: string;
-let nebulaeFilter: PIXI.Filter;
-let blurFilter: PIXI.Filter;
-let bloomFilter: Filters.BloomFilter;
-let cometContainer: PIXI.Container;
-let audio: HTMLAudioElement;
-
 window.onload = load;
 
 // ==============
@@ -131,42 +65,69 @@ window.onload = load;
 // ==============
 
 function load() {
-    audio = new Audio("sounds/Divine Divinity - Main Theme.ogg");
-    audio.loop = true;
-    audio.muted = params.mute;
-    audio.addEventListener("canplaythrough", () => {
-        audio.play();
-    }, false);
-    Promise.all([readTextFilePromise("comet-emitter.json"), readTextFilePromise("nebulae.frag.glsl")])
-        .then((data) => {
-            params.comet.emitterConfig = JSON.parse(data[0]);
-            nebulaeShaderSrc = data[1];
+    const loader = new PIXI.loaders.Loader();
+    loader
+        .add("params", "./starfield.json")
+        .add("nebulaeShaderSrc", "./nebulae.frag.glsl")
+        .add("cometParticle", "./images/particle.png")
+        .on("progress", (loader: PIXI.loaders.Loader, ressource: PIXI.loaders.Resource) => {
+            loader; // Prevents TS unused parameter error
+            console.log("Loading " + ressource.url + "...");
+        })
+        .on("load", (loader: PIXI.loaders.Loader, ressource: PIXI.loaders.Resource) => {
+            loader; // Prevents TS unused parameter error
+            console.log(ressource.url + " loaded.");
+        })
+        .on("error", (error: Error) => {
+            console.log(error)
+        })
+        .load((loader: PIXI.loaders.Loader, ressources: any) => {
+            loader; // Prevents TS unused parameter error
+            params = ressources.params.data;
+            nebulaeShaderSrc = ressources.nebulaeShaderSrc.data;
+            cometParticle = ressources.cometParticle.texture;
             create();
-        })
-        .catch(error => {
-            console.log(error);
-        })
+        });
 } // load
 
 function create() {
-    // Comet Container
+    engine = new Engine(params.canvasW, params.canvasH, "game");
+
+    /* Music */
+    audio = new Audio("sounds/Divine Divinity - Main Theme.ogg");
+    audio.addEventListener("canplaythrough", () => {
+        audio.loop = true;
+        audio.muted = params.mute;
+        audio.play();
+    }, false);
+    
+    /* Comet Container */
     cometContainer = new PIXI.Container();
 
-    // Filters
-    nebulaeFilter = new PIXI.Filter("", nebulaeShaderSrc);
+    /* Filters */
+    nebulaeShader = new PIXI.Filter("", nebulaeShaderSrc);
     blurFilter = new PIXI.filters.BlurFilter(params.blur);
     bloomFilter = new Filters.BloomFilter();
+    bloomFilter.blur = params.bloom;
 
     /* GUI */
-    let gui = new dat.GUI({ "autoPlace": false });
+
+    // Save Default Parameters
+    // gui.remember(params);
+
+    // Global parameters
     let guiPanel = document.getElementById("gui-panel") as HTMLElement;
     guiPanel.appendChild(gui.domElement);
-    gui.addColor(params, "backgroundColor").onChange(updateBackgroundColor);
     gui.add(params, "canvasW").onChange((value: int) => { params.canvasW = value; });
     gui.add(params, "canvasH").onChange((value: int) => { params.canvasH = value; });
     gui.add(params, "blur", 0.0, 2.0, 0.05).onChange((value: float) => {
         params.blur = value;
         blurFilter = new PIXI.filters.BlurFilter(params.blur);
+    });
+    gui.add(params, "bloom", 0.0, 10.0, 0.5).onChange((value: float) => {
+        params.blur = value;
+        bloomFilter = new Filters.BloomFilter();
+        bloomFilter.blur = params.bloom;
     });
     gui.add(params, "mute").onChange((value: boolean) => {
         params.mute = value;
@@ -189,7 +150,7 @@ function create() {
     guiLayerBack.add(params.layers[0], "speedY", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[0].speedY = value; });
     guiLayerBack.add(params.layers[0], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: float) => { params.layers[0].brightSpeed = value; });
     guiLayerBack.addColor(params.layers[0], "tone").onChange((value: int | string) => {
-        params.layers[0].tone = typeof value === "string" ? rgbStringToNumber(value) : value;
+        params.layers[0].tone = typeof value === "number" ? color.rgbNumberToString(value) : value;
     });
 
     // Middle Layer folder
@@ -201,7 +162,7 @@ function create() {
     guiLayerMiddle.add(params.layers[1], "speedY", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[1].speedY = value; });
     guiLayerMiddle.add(params.layers[1], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: float) => { params.layers[1].brightSpeed = value; });
     guiLayerMiddle.addColor(params.layers[1], "tone").onChange((value: int | string) => {
-        params.layers[1].tone = typeof value === "string" ? rgbStringToNumber(value) : value;
+        params.layers[1].tone = typeof value === "number" ? color.rgbNumberToString(value) : value;
     });
 
     // Front Layer folder
@@ -213,7 +174,7 @@ function create() {
     guiLayerFront.add(params.layers[2], "speedY", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[2].speedY = value; });
     guiLayerFront.add(params.layers[2], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: float) => { params.layers[2].brightSpeed = value; });
     guiLayerFront.addColor(params.layers[2], "tone").onChange((value: int | string) => {
-        params.layers[2].tone = typeof value === "string" ? rgbStringToNumber(value) : value;
+        params.layers[2].tone = typeof value === "number" ? color.rgbNumberToString(value) : value;
     });
 
     // Comet folder
@@ -225,10 +186,16 @@ function create() {
     guiComet.add(params.comet, "length", 0.0, 20.0, 0.01).onChange((value: float) => { params.comet.length = value; });
     guiComet.add(params.comet, "density", 0.0, 1.0, 0.01).onChange((value: float) => { params.comet.density = value; });
     guiComet.addColor(params.comet, "headColor").onChange((value: int | string) => {
-        params.comet.headColor = typeof value === "string" ? rgbStringToNumber(value) : value;
+        params.comet.headColor = typeof value === "number" ? color.rgbNumberToString(value) : value;
     });
     guiComet.addColor(params.comet, "tailColor").onChange((value: int | string) => {
-        params.comet.tailColor = typeof value === "string" ? rgbStringToNumber(value) : value;
+        params.comet.tailColor = typeof value === "number" ? color.rgbNumberToString(value) : value;
+    });
+
+    // Seed
+    gui.add(params, "seed", 0, 9999999999999, 1).onChange((value: int) => {
+        params.seed = value;
+        generate(params.seed);
     });
 
     // Regenerate button
@@ -236,7 +203,7 @@ function create() {
     let button = document.createElement("button");
     button.innerText = "Regenerate";
     button.id = "regenerate";
-    button.onclick = generate;
+    button.onclick = generate.bind(undefined, undefined);
     guiButton.appendChild(button);
 
     /* FPS */
@@ -329,58 +296,13 @@ function render() {
 // === HELPERS ===
 // ===============
 
-function readTextFile(filename: string, callback: (error?: any, data?: string) => void) {
-    let textFile = new XMLHttpRequest();
-    textFile.onreadystatechange = () => {
-        if(textFile.readyState === XMLHttpRequest.DONE) {
-            if(textFile.status === 200 || textFile.status == 0) {
-                callback(undefined, textFile.responseText);
-            }
-            else {
-                callback("Error loading " + filename, undefined)
-            }
-        }
-    }
-    textFile.open("GET", filename, true);
-    textFile.send(null);
-} // readTextFile
-
-type PromiseResolve<T> = (value?: T | PromiseLike<T>) => void;
-type PromiseReject = (error?: any) => void;
- 
-function readTextFilePromise(filename: string) {
-    return new Promise<string>((resolve: PromiseResolve<string>, reject: PromiseReject): void => {
-        readTextFile(filename, (error: any, data: string) => {
-            if (error) reject(error)
-            else resolve(data)
-        });
-    });
-} // readTextFilePromise
-
-function rgbStringToNumber(rgb: int | string): int {
-    let rgbInt: int;
-    if (typeof rgb === "number") {
-        rgbInt = rgb;
-    }
-    else {
-        rgbInt = color.rgbStringToNumber(rgb);
-    }
-    return rgbInt;
-} // rgbStringToNumber
-
-function updateBackgroundColor(rgb: int | string) {
-    let rgbInt = rgbStringToNumber(rgb);
-    params.backgroundColor = rgbInt;
-    engine.renderer.backgroundColor = rgbInt;
-} // updateBackgroundColor
-
 function createStarSprite(star: Star.Star) {
     let graphics = new PIXI.Graphics();
     graphics.lineStyle(0, 0, star.alpha);
     graphics.beginFill(0xffffff, star.alpha);
     graphics.drawCircle(star.size, star.size, star.size);
     graphics.endFill();
-    engine.graphics.filters = [blurFilter];
+    graphics.filters = [blurFilter];
 
     let texture = PIXI.RenderTexture.create(graphics.width, graphics.height);
     engine.renderer.render(graphics, texture);
@@ -391,12 +313,27 @@ function createStarSprite(star: Star.Star) {
 function spawnComet() {
     cometContainer.filters = [blurFilter];
     engine.stage.addChild(cometContainer);
-    comets.push(new Comet.Comet(cometContainer, params.comet));
+    comets.push(new Comet.Comet(cometContainer, cometParticle, params.comet));
 } // spawnComet
 
-function generate() {
+function generate(seed?: number) {
     let now = performance.now();
     engine.stage.removeChildren();
+
+    /* Initialize RNG */
+    if (seed === undefined || !isFinite(seed)) {
+        params.seed = now;
+    }
+    else {
+        params.seed = seed;
+    }
+    rng.repot(params.seed);
+    for (let i = 0; i < gui.__controllers.length; i++) {
+        if (gui.__controllers[i].property === "seed") {
+            gui.__controllers[i].updateDisplay();
+            break;
+        }
+    } // for i
 
     /* Setup Renderer */
     engine.renderer.backgroundColor = params.backgroundColor;
@@ -404,18 +341,17 @@ function generate() {
     engine.renderer.resize(params.canvasW, params.canvasH);
 
     /* Nebulae Background */
-    nebulaeFilter.uniforms.iResolution = new Float32Array([params.canvasW, params.canvasH]);
-    nebulaeFilter.uniforms.iGlobalTime = now;
-    nebulaeFilter.uniforms.redPow = params.nebulae.redPow;
-    nebulaeFilter.uniforms.greenPow = params.nebulae.greenPow;
-    nebulaeFilter.uniforms.bluePow = params.nebulae.bluePow;
-    nebulaeFilter.uniforms.noiseColor = params.nebulae.noiseColor;
-    engine.graphics.clear();
-    engine.graphics.lineStyle(0, 0);
-    engine.graphics.drawRect(0, 0, params.canvasW, params.canvasH);
-    engine.graphics.filters = [nebulaeFilter];
-    let texture = PIXI.RenderTexture.create(engine.graphics.width, engine.graphics.height);
-    engine.renderer.render(engine.graphics, texture);
+    nebulaeShader.uniforms.iResolution = new Float32Array([params.canvasW, params.canvasH]);
+    nebulaeShader.uniforms.redPow = params.nebulae.redPow;
+    nebulaeShader.uniforms.greenPow = params.nebulae.greenPow;
+    nebulaeShader.uniforms.bluePow = params.nebulae.bluePow;
+    nebulaeShader.uniforms.noiseColor = params.nebulae.noiseColor;
+    nebulaeShader.uniforms.iGlobalTime = params.seed;
+    let graphics = new PIXI.Graphics();
+    graphics.filterArea = new PIXI.Rectangle(0, 0, params.canvasW, params.canvasH);
+    graphics.filters = [nebulaeShader];
+    let texture = PIXI.RenderTexture.create(params.canvasW, params.canvasH);
+    engine.renderer.render(graphics, texture);
     let sprite = new PIXI.Sprite(texture);
     engine.stage.addChild(sprite);
 

@@ -1,9 +1,8 @@
 // comet.ts
 
-import particles = require("pixi-particles");
+import Particles = require("pixi-particles");
 import g2d = require("geometry2d");
 import rng = require("./rng");
-import color = require("color-ts");
 
 export interface Bounds {
     minX: float;
@@ -37,7 +36,7 @@ export class Comet {
     private bounds: Bounds;
     private dx: float;
     private dy: float;
-    private emitter: particles.Emitter;
+    private emitter: Particles.Emitter;
 
     public static setSpawnStart(time: float, params: Params) {
         Comet.spawnStart = time;
@@ -48,7 +47,7 @@ export class Comet {
         Comet.spawnDelay = rng.range(params.minSpawnDelay, params.maxSpawnDelay);
     } // setSpawnDelay
 
-    constructor(public container: PIXI.Container, params: Params) {
+    constructor(public container: PIXI.Container, particle: PIXI.Texture, params: Params) {
         this.bounds = params.outerBounds;
 
         /* Reset spawn delay */
@@ -96,11 +95,11 @@ export class Comet {
         emitterConfig.lifetime.min *=  params.length * params.density;
         emitterConfig.startRotation.min = (angle + Math.PI) * 180 / Math.PI;
         emitterConfig.startRotation.max = emitterConfig.startRotation.min;
-        emitterConfig.color.start = color.rgbNumberToString(params.headColor);
-        emitterConfig.color.end = color.rgbNumberToString(params.tailColor);
-        this.emitter = new particles.Emitter(
+        emitterConfig.color.start = params.headColor;
+        emitterConfig.color.end = params.tailColor;
+        this.emitter = new Particles.Emitter(
             container,
-            [PIXI.Texture.fromImage("./images/particle.png")],
+            [particle],
             emitterConfig);
         this.emitter.updateOwnerPos(this.x, this.y);
         this.emitter.emit = true;
