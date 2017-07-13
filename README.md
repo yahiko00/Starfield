@@ -1,10 +1,10 @@
 # Starfield Generator #
 
-Procedural generated 2D starfield.
+Procedural generated 2D starfield using WebGL.
 
 ## Overview ##
 
-![Starfield overview](https://raw.githubusercontent.com/yahiko00/yahiko00.github.io/master/images/starfield20170711.gif)
+![Starfield overview](https://raw.githubusercontent.com/yahiko00/yahiko00.github.io/master/images/starfield20170713b.gif)
 
 **[Online Demonstration](http://yahiko.developpez.com/apps/Starfield/)**
 
@@ -15,10 +15,13 @@ Procedural generated 2D starfield.
 * Star positions follow a uniform distribution.
 * Star colorization based on HSL and Gaussian distribution around the given star field's tone.
 * Anti-aliasing.
-* Blurring effect.
+* Blur effect.
+* Bloom effect.
 * Comet generated with a particle system.
 * Nebulae background generated with simplex noise.
 * GUI to change parameters.
+
+Your browser and GPU have to support WebGL to make this star field generator works. Old Intel HD Graphics may not render all effects.
 
 
 ## Installation ##
