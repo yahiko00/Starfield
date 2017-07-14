@@ -5,40 +5,40 @@ import g2d = require("geometry2d");
 import rng = require("./rng");
 
 export interface Bounds {
-    minX: float;
-    minY: float;
-    maxX: float;
-    maxY: float;
+    minX: double;
+    minY: double;
+    maxX: double;
+    maxY: double;
 }
 
 export interface Params {
     minSpawnDelay: int;
     maxSpawnDelay: int;
-    speed: float;
-    size: float;
-    length: float;
-    density: float;
+    speed: double;
+    size: double;
+    length: double;
+    density: double;
     headColor: int;
     tailColor: int;
-    minLifetime: float;
-    maxLifetime: float;
+    minLifetime: double;
+    maxLifetime: double;
     innerBounds: Bounds;
     outerBounds: Bounds;
     emitterConfig: any;
 } // Params
 
 export class Comet {
-    public static spawnStart: float;
-    public static spawnDelay: float;
-    public x: float;
-    public y: float;
-    private lifetime: float;
+    public static spawnStart: double;
+    public static spawnDelay: double;
+    public x: double;
+    public y: double;
+    private lifetime: double;
     private bounds: Bounds;
-    private dx: float;
-    private dy: float;
+    private dx: double;
+    private dy: double;
     private emitter: Particles.Emitter;
 
-    public static setSpawnStart(time: float, params: Params) {
+    public static setSpawnStart(time: double, params: Params) {
         Comet.spawnStart = time;
         Comet.setSpawnDelay(params);
     } // setSpawnStart
@@ -105,7 +105,7 @@ export class Comet {
         this.emitter.emit = true;
     } // constructor
 
-    public update(deltaTime: float, timeRatio: float, destroy: () => void) {
+    public update(deltaTime: double, timeRatio: double, destroy: () => void) {
         this.lifetime--;
         this.x += this.dx * timeRatio;
         this.y += this.dy * timeRatio;

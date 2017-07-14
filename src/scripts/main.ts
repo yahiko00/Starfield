@@ -33,7 +33,7 @@ class Engine {
     public renderer: PIXI.SystemRenderer;
     public stage: PIXI.Container;
     public fps: int;
-    public elapsed: float;
+    public elapsed: double;
 
     constructor(width: int, height: int, containerId?: string, fps = 60) {
         this.loader = PIXI.loader;
@@ -72,10 +72,6 @@ function load() {
         .on("progress", (loader: PIXI.loaders.Loader, ressource: PIXI.loaders.Resource) => {
             loader; // Prevents TS unused parameter error
             console.log("Loading " + ressource.url + "...");
-        })
-        .on("load", (loader: PIXI.loaders.Loader, ressource: PIXI.loaders.Resource) => {
-            loader; // Prevents TS unused parameter error
-            console.log(ressource.url + " loaded.");
         })
         .on("error", (error: Error) => {
             console.log(error)
@@ -118,7 +114,7 @@ function create() {
     guiPanel.appendChild(gui.domElement);
     gui.add(params, "canvasW").onChange((value: int) => { params.canvasW = value; });
     gui.add(params, "canvasH").onChange((value: int) => { params.canvasH = value; });
-    gui.add(params, "bloom", 0.0, 10.0, 0.5).onChange((value: float) => {
+    gui.add(params, "bloom", 0.0, 10.0, 0.5).onChange((value: double) => {
         params.blur = value;
         bloomFilter = new Filters.BloomFilter();
         bloomFilter.blur = params.bloom;
@@ -130,19 +126,19 @@ function create() {
 
     // Nebulae folder
     let guiNebulae = gui.addFolder("Nebulae");
-    guiNebulae.add(params.nebulae, "redPow", 0.0, 10.0, 0.1).onChange((value: float) => { params.nebulae.redPow = value; });
-    guiNebulae.add(params.nebulae, "greenPow", 0.0, 10.0, 0.1).onChange((value: float) => { params.nebulae.greenPow = value; });
-    guiNebulae.add(params.nebulae, "bluePow", 0.0, 10.0, 0.1).onChange((value: float) => { params.nebulae.bluePow = value; });
-    guiNebulae.add(params.nebulae, "noiseColor", 0.0, 1.0, 0.01).onChange((value: float) => { params.nebulae.noiseColor = value; });
+    guiNebulae.add(params.nebulae, "redPow", 0.0, 10.0, 0.1).onChange((value: double) => { params.nebulae.redPow = value; });
+    guiNebulae.add(params.nebulae, "greenPow", 0.0, 10.0, 0.1).onChange((value: double) => { params.nebulae.greenPow = value; });
+    guiNebulae.add(params.nebulae, "bluePow", 0.0, 10.0, 0.1).onChange((value: double) => { params.nebulae.bluePow = value; });
+    guiNebulae.add(params.nebulae, "noiseColor", 0.0, 1.0, 0.01).onChange((value: double) => { params.nebulae.noiseColor = value; });
 
     // Back Layer folder
     let guiLayerBack = gui.addFolder("Back Layer");
     guiLayerBack.add(params.layers[0], "nbStars", 0, 10000, 10).onChange((value: int) => { params.layers[0].nbStars = value; });
-    guiLayerBack.add(params.layers[0], "sizeMin", 0.0, 10.0, 0.1).onChange((value: float) => { params.layers[0].sizeMin = value; });
-    guiLayerBack.add(params.layers[0], "sizeMax", 0.0, 10.0, 0.1).onChange((value: float) => { params.layers[0].sizeMax = value; });
-    guiLayerBack.add(params.layers[0], "speedX", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[0].speedX = value; });
-    guiLayerBack.add(params.layers[0], "speedY", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[0].speedY = value; });
-    guiLayerBack.add(params.layers[0], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: float) => { params.layers[0].brightSpeed = value; });
+    guiLayerBack.add(params.layers[0], "sizeMin", 0.0, 10.0, 0.1).onChange((value: double) => { params.layers[0].sizeMin = value; });
+    guiLayerBack.add(params.layers[0], "sizeMax", 0.0, 10.0, 0.1).onChange((value: double) => { params.layers[0].sizeMax = value; });
+    guiLayerBack.add(params.layers[0], "speedX", -10.0, 10.0, 0.01).onChange((value: double) => { params.layers[0].speedX = value; });
+    guiLayerBack.add(params.layers[0], "speedY", -10.0, 10.0, 0.01).onChange((value: double) => { params.layers[0].speedY = value; });
+    guiLayerBack.add(params.layers[0], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: double) => { params.layers[0].brightSpeed = value; });
     guiLayerBack.addColor(params.layers[0], "tone").onChange((value: int | string) => {
         params.layers[0].tone = typeof value === "number" ? color.rgbNumberToString(value) : value;
     });
@@ -150,11 +146,11 @@ function create() {
     // Middle Layer folder
     let guiLayerMiddle = gui.addFolder("Middle Layer");
     guiLayerMiddle.add(params.layers[1], "nbStars", 0, 5000, 10).onChange((value: int) => { params.layers[1].nbStars = value; });
-    guiLayerMiddle.add(params.layers[1], "sizeMin", 0.0, 10.0, 0.1).onChange((value: float) => { params.layers[1].sizeMin = value; });
-    guiLayerMiddle.add(params.layers[1], "sizeMax", 0.0, 10.0, 0.1).onChange((value: float) => { params.layers[1].sizeMax = value; });
-    guiLayerMiddle.add(params.layers[1], "speedX", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[1].speedX = value; });
-    guiLayerMiddle.add(params.layers[1], "speedY", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[1].speedY = value; });
-    guiLayerMiddle.add(params.layers[1], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: float) => { params.layers[1].brightSpeed = value; });
+    guiLayerMiddle.add(params.layers[1], "sizeMin", 0.0, 10.0, 0.1).onChange((value: double) => { params.layers[1].sizeMin = value; });
+    guiLayerMiddle.add(params.layers[1], "sizeMax", 0.0, 10.0, 0.1).onChange((value: double) => { params.layers[1].sizeMax = value; });
+    guiLayerMiddle.add(params.layers[1], "speedX", -10.0, 10.0, 0.01).onChange((value: double) => { params.layers[1].speedX = value; });
+    guiLayerMiddle.add(params.layers[1], "speedY", -10.0, 10.0, 0.01).onChange((value: double) => { params.layers[1].speedY = value; });
+    guiLayerMiddle.add(params.layers[1], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: double) => { params.layers[1].brightSpeed = value; });
     guiLayerMiddle.addColor(params.layers[1], "tone").onChange((value: int | string) => {
         params.layers[1].tone = typeof value === "number" ? color.rgbNumberToString(value) : value;
     });
@@ -162,11 +158,11 @@ function create() {
     // Front Layer folder
     let guiLayerFront = gui.addFolder("Front Layer");
     guiLayerFront.add(params.layers[2], "nbStars", 0, 1000, 10).onChange((value: int) => { params.layers[2].nbStars = value; });
-    guiLayerFront.add(params.layers[2], "sizeMin", 0.0, 10.0, 0.1).onChange((value: float) => { params.layers[2].sizeMin = value; });
-    guiLayerFront.add(params.layers[2], "sizeMax", 0.0, 10.0, 0.1).onChange((value: float) => { params.layers[2].sizeMax = value; });
-    guiLayerFront.add(params.layers[2], "speedX", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[2].speedX = value; });
-    guiLayerFront.add(params.layers[2], "speedY", -10.0, 10.0, 0.01).onChange((value: float) => { params.layers[2].speedY = value; });
-    guiLayerFront.add(params.layers[2], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: float) => { params.layers[2].brightSpeed = value; });
+    guiLayerFront.add(params.layers[2], "sizeMin", 0.0, 10.0, 0.1).onChange((value: double) => { params.layers[2].sizeMin = value; });
+    guiLayerFront.add(params.layers[2], "sizeMax", 0.0, 10.0, 0.1).onChange((value: double) => { params.layers[2].sizeMax = value; });
+    guiLayerFront.add(params.layers[2], "speedX", -10.0, 10.0, 0.01).onChange((value: double) => { params.layers[2].speedX = value; });
+    guiLayerFront.add(params.layers[2], "speedY", -10.0, 10.0, 0.01).onChange((value: double) => { params.layers[2].speedY = value; });
+    guiLayerFront.add(params.layers[2], "brightSpeed", 0.00, 0.01, 0.0001).onChange((value: double) => { params.layers[2].brightSpeed = value; });
     guiLayerFront.addColor(params.layers[2], "tone").onChange((value: int | string) => {
         params.layers[2].tone = typeof value === "number" ? color.rgbNumberToString(value) : value;
     });
@@ -175,10 +171,10 @@ function create() {
     let guiComet = gui.addFolder("Comet");
     guiComet.add(params.comet, "minSpawnDelay", 0, 10000, 10).onChange((value: int) => { params.comet.minSpawnDelay = value; });
     guiComet.add(params.comet, "maxSpawnDelay", 0, 10000, 10).onChange((value: int) => { params.comet.maxSpawnDelay = value; });
-    guiComet.add(params.comet, "speed", 0.0, 10.0, 0.1).onChange((value: float) => { params.comet.speed = value; });
-    guiComet.add(params.comet, "size",  0.0, 10.0, 0.1).onChange((value: float) => { params.comet.size = value; });
-    guiComet.add(params.comet, "length", 0.0, 20.0, 0.01).onChange((value: float) => { params.comet.length = value; });
-    guiComet.add(params.comet, "density", 0.0, 1.0, 0.01).onChange((value: float) => { params.comet.density = value; });
+    guiComet.add(params.comet, "speed", 0.0, 10.0, 0.1).onChange((value: double) => { params.comet.speed = value; });
+    guiComet.add(params.comet, "size",  0.0, 10.0, 0.1).onChange((value: double) => { params.comet.size = value; });
+    guiComet.add(params.comet, "length", 0.0, 20.0, 0.01).onChange((value: double) => { params.comet.length = value; });
+    guiComet.add(params.comet, "density", 0.0, 1.0, 0.01).onChange((value: double) => { params.comet.density = value; });
     guiComet.addColor(params.comet, "headColor").onChange((value: int | string) => {
         params.comet.headColor = typeof value === "number" ? color.rgbNumberToString(value) : value;
     });

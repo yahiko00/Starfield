@@ -4,28 +4,28 @@ import rng = require("./rng");
 import color = require("color-ts");
 
 export interface StarParams {
-    sizeMin: float,
-    sizeMax: float,
-    speedX: float,
-    speedY: float,
-    brightSpeed: float,
+    sizeMin: double,
+    sizeMax: double,
+    speedX: double,
+    speedY: double,
+    brightSpeed: double,
     tone: string
 } // StarParams
 
 export class Star implements Point {
-    public alpha: float;
+    public alpha: double;
     public hsl: Vec3f;
-    public size: float;
+    public size: double;
     private speed: Point;
-    private brightChange: float;
+    private brightChange: double;
 
     constructor(
-        public x: float,
-        public y: float,
-        private minX: float,
-        private minY: float,
-        private maxX: float,
-        private maxY: float,
+        public x: double,
+        public y: double,
+        private minX: double,
+        private minY: double,
+        private maxX: double,
+        private maxY: double,
         params: StarParams) {
             this.size = rng.range(params.sizeMin, params.sizeMax);
             this.speed = { "x": params.speedX, "y": params.speedY };
@@ -41,7 +41,7 @@ export class Star implements Point {
             this.alpha = 1.0;
     } // constructor
 
-    update(time: float, timeRatio: float) {
+    update(time: double, timeRatio: double) {
         this.hsl[2] = 0.75 + Math.sin(time * this.brightChange) / 4.0;
 
         // Move and warp

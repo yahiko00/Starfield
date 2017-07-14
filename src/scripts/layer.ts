@@ -12,7 +12,7 @@ export class Layer {
     public nbStars: int;
     private starParams: Star.StarParams;
     
-    constructor (private minX: float, private minY: float, private maxX: float, private maxY: float, params: LayerParams) {
+    constructor (private minX: double, private minY: double, private maxX: double, private maxY: double, params: LayerParams) {
         this.nbStars = params.nbStars;
         this.stars = new Array(this.nbStars);
         this.starParams = params;
@@ -32,7 +32,7 @@ export class Layer {
         } // for i
     } // generate
 
-    public update(time: float, timeRatio: float) {
+    public update(time: double, timeRatio: double) {
         for (let i = 0; i <= this.nbStars; i++) {
             this.stars[i].update(time, timeRatio);
         } // for i
