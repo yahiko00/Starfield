@@ -30,14 +30,14 @@ const gui = new dat.GUI({ load: JSON, autoPlace: false });
 class Engine {
     public container: HTMLElement;
     public loader: PIXI.loaders.Loader;
-    public renderer: PIXI.SystemRenderer;
+    public renderer: PIXI.WebGLRenderer;
     public stage: PIXI.Container;
     public fps: int;
     public elapsed: double;
 
     constructor(width: int, height: int, containerId?: string, fps = 60) {
         this.loader = PIXI.loader;
-        this.renderer = PIXI.autoDetectRenderer(width, height, { "antialias": true });
+        this.renderer = new PIXI.WebGLRenderer(width, height, { "antialias": true });
         this.stage = new PIXI.Container();
         this.fps = fps;
         this.elapsed = performance.now();
