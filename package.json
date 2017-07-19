@@ -36,6 +36,7 @@
     "gulp-typescript": "^3.2.0",
     "gulp-uglify": "^3.0.0",
     "gulp-util": "^3.0.8",
+    "pixi.js": "^4.5.3",
     "run-sequence": "^2.0.0",
     "tape": "^4.7.0",
     "through2": "^2.0.3",
@@ -53,8 +54,7 @@
     "geometry2d": "^0.1.8",
     "pixi-filters": "^1.0.6",
     "pixi-particles": "yahiko00/pixi-particles",
-    "pixi-typescript": "pixijs/pixi-typescript#v4.x",
-    "pixi.js": "^4.5.3"
+    "pixi-typescript": "pixijs/pixi-typescript#v4.x"
   },
   "settings": {
     "debug": true,
