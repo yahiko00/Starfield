@@ -256,15 +256,14 @@ function render() {
     let now = performance.now();
     let frameTime = now - fpsMeter.elapsed;
 
-    /* Sprites */
+    /* Star Sprites */
     for (let i = 0; i < layers.length; i++) {
         let layer = layers[i];
 
         for (let j = 0; j < layer.nbStars; j++) {
             let star = layer.stars[j];
             let sprite = starSprites[i][j];
-            sprite.x = star.x;
-            sprite.y = star.y;
+            sprite.position.set(star.x, star.y);
             let [red, green, blue] = color.hslToRgb([star.hsl[0], star.hsl[1], star.hsl[2]]);
             sprite.tint = (red << 16) + (green << 8) + (blue << 0);
         } // for j
@@ -296,6 +295,7 @@ function createStarSprite(star: Star.Star) {
     let texture = PIXI.RenderTexture.create(graphics.width, graphics.height);
     engine.renderer.render(graphics, texture);
     let sprite = new PIXI.Sprite(texture);
+    sprite.anchor.set(0.5);
     return sprite;
 } // createStarSprite
 
